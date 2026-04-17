@@ -872,6 +872,120 @@
           itemGap: 22
         }
       }
+    },
+    zhishi: {
+      id: "zhishi",
+      name: "Zhishi",
+      theme: "zhishi",
+      coverSubtitle: "小说素材|干货分享|写作技巧",
+      background: {
+        styleKey: "zhishi",
+        allowFallback: false
+      },
+      colors: {
+        textPrimary: "#0A0A0A",
+        textSecondary: "#101010"
+      },
+      typography: {
+        fontFamily: "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif",
+        coverTopSize: 66,
+        coverTopWeight: 500,
+        coverTitleStartSize: 140,
+        coverTitleMinSize: 88,
+        coverTitleWeight: 700,
+        coverSubtitleStartSize: 60,
+        coverSubtitleMinSize: 44,
+        coverSubtitleWeight: 500
+      },
+      layout: {
+        cover: {
+          topTextX: 30,
+          topTextY: 372,
+          topTextWidth: 460,
+          topTextLineHeight: 72,
+          topTextMaxLines: 1,
+          titleCenterX: 540,
+          titleY: 772,
+          titleWidth: 980,
+          titleLineHeight: 124,
+          titleMaxLines: 2,
+          subtitleCenterX: 540,
+          subtitleY: 1320,
+          subtitleWidth: 760,
+          subtitleLineHeight: 66,
+          subtitleMaxLines: 1
+        },
+        page: {
+          bodyX: 46,
+          bodyY: 92,
+          bodyWidth: 988,
+          bodyMaxY: 1378,
+          itemLineHeight: 64,
+          itemGap: 24
+        }
+      }
+    },
+    xiangxiang: {
+      id: "xiangxiang",
+      name: "Xiangxiang",
+      theme: "xiangxiang",
+      coverSubtitle: "小说素材|干货分享",
+      background: {
+        styleKey: "xiangxiang",
+        allowFallback: false
+      },
+      colors: {
+        textPrimary: "#1C1C1C",
+        textSecondary: "#211F1F"
+      },
+      typography: {
+        fontFamily: "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif",
+        coverTopSize: 58,
+        coverTopWeight: 500,
+        coverTitleStartSize: 122,
+        coverTitleMinSize: 74,
+        coverTitleWeight: 700,
+        coverSubtitleStartSize: 52,
+        coverSubtitleMinSize: 40,
+        coverSubtitleWeight: 500,
+        pageTitleSize: 60,
+        pageTitleWeight: 700,
+        bodySize: 45,
+        bodyWeight: 500,
+        leadWeight: 700
+      },
+      layout: {
+        cover: {
+          topTextX: 132,
+          topTextY: 510,
+          topTextWidth: 492,
+          topTextLineHeight: 66,
+          topTextMaxLines: 1,
+          titleCenterX: 540,
+          titleY: 736,
+          titleWidth: 882,
+          titleLineHeight: 108,
+          titleMaxLines: 2,
+          subtitleCenterX: 540,
+          subtitleY: 1318,
+          subtitleWidth: 450,
+          subtitleLineHeight: 58,
+          subtitleMaxLines: 1
+        },
+        page: {
+          titleX: 83,
+          titleY: 100,
+          titleWidth: 909,
+          titleLineHeight: 70,
+          titleMaxLines: 2,
+          bodyX: 83,
+          bodyY: 182,
+          bodyWidth: 909,
+          bodyMaxY: 1000,
+          itemLineHeight: 56,
+          itemGap: 20
+        }
+      }
     }
   });
 
@@ -895,7 +1009,15 @@
     ban_xia: "banxia",
     "ban-xia": "banxia",
     "半夏": "banxia",
-    "半夏416": "banxia"
+    "半夏416": "banxia",
+    zhishi: "zhishi",
+    zhi_shi: "zhishi",
+    "zhi-shi": "zhishi",
+    "芝士": "zhishi",
+    xiangxiang: "xiangxiang",
+    xiang_xiang: "xiangxiang",
+    "xiang-xiang": "xiangxiang",
+    "香香": "xiangxiang"
   });
 
   var imageCache = new Map();
@@ -1097,6 +1219,7 @@
           "data-xhs-image-count",
           String((refs.resultList.querySelectorAll("img") || []).length)
         );
+        emitAutorunConsoleExport(params);
         if (autoDownload) {
           triggerAutorunDownloads(Number.isNaN(autoDownloadIndex) ? null : autoDownloadIndex);
         }
@@ -1144,6 +1267,69 @@
         }, index * 1200);
       })(i);
     }
+  }
+
+  function emitAutorunConsoleExport(params) {
+    if (!params || params.get("xhs_export_console") !== "1") {
+      return;
+    }
+
+    var figures = refs.resultList.querySelectorAll(".thumb");
+    var chunkSize = 30;
+    var exported = 0;
+
+    for (var i = 0; i < figures.length; i += 1) {
+      var figure = figures[i];
+      var imgNode = figure.querySelector("img");
+      var buttonNode = figure.querySelector(".btn.btn-ghost");
+      var dataUrl = sanitizeText(imgNode && imgNode.src);
+      var fileName =
+        sanitizeText(buttonNode && buttonNode.getAttribute("data-file-name")) ||
+        "xhs_" + String(i + 1).padStart(2, "0") + ".jpg";
+
+      if (!/^data:image\//i.test(dataUrl)) {
+        continue;
+      }
+
+      var commaIndex = dataUrl.indexOf(",");
+      if (commaIndex <= 0) {
+        continue;
+      }
+
+      var mimeMeta = dataUrl.slice(5, commaIndex);
+      var base64 = dataUrl.slice(commaIndex + 1);
+      var serial = i + 1;
+      var chunkCount = Math.max(1, Math.ceil(base64.length / chunkSize));
+
+      console.log(
+        "XHS_EXPORT_BEGIN|" +
+          serial +
+          "|" +
+          fileName +
+          "|" +
+          mimeMeta +
+          "|" +
+          base64.length +
+          "|" +
+          chunkCount
+      );
+
+      for (var start = 0, chunkNo = 1; start < base64.length; start += chunkSize, chunkNo += 1) {
+        console.log(
+          "XHS_EXPORT_CHUNK|" +
+            serial +
+            "|" +
+            chunkNo +
+            "|" +
+            base64.slice(start, start + chunkSize)
+        );
+      }
+
+      console.log("XHS_EXPORT_END|" + serial);
+      exported += 1;
+    }
+
+    console.log("XHS_EXPORT_DONE|" + exported);
   }
 
   async function onDoubaoLayoutStyleChange() {
@@ -2403,7 +2589,7 @@
     var mappedStyle = mapStyleAlias(styleInput) || mapStyleAlias(contentStyleInput);
     if (!mappedStyle || !STYLE_PROFILES[mappedStyle]) {
       throw new Error(
-        "style 无效。当前支持：xiaoxing（小星）、xiaoxing_lab（小星写作实验室）、rifu（日富）、banxia（半夏）。"
+        "style 无效。当前支持：xiaoxing（小星）、xiaoxing_lab（小星写作实验室）、rifu（日富）、banxia（半夏）、zhishi（芝士）、xiangxiang（香香）。"
       );
     }
 
@@ -2816,7 +3002,9 @@
     if (
       group.profile.theme !== "xiaoxing_lab" &&
       group.profile.theme !== "rifu" &&
-      group.profile.theme !== "banxia"
+      group.profile.theme !== "banxia" &&
+      group.profile.theme !== "zhishi" &&
+      group.profile.theme !== "xiangxiang"
     ) {
       return group.pages.slice();
     }
@@ -2933,7 +3121,11 @@
     var testCtx = createCanvas().getContext("2d");
     var canFitCandidate;
 
-    if (group.profile.theme === "xiaoxing_lab" || group.profile.theme === "banxia") {
+    if (
+      group.profile.theme === "xiaoxing_lab" ||
+      group.profile.theme === "banxia" ||
+      group.profile.theme === "zhishi"
+    ) {
       testCtx.fillStyle = "#111";
       testCtx.font = "500 45px 'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
       canFitCandidate = function (candidate) {
@@ -2942,6 +3134,10 @@
     } else if (group.profile.theme === "rifu") {
       canFitCandidate = function (candidate) {
         return canFitRifuListItems(testCtx, candidate, group.profile, segmentTypes);
+      };
+    } else if (group.profile.theme === "xiangxiang") {
+      canFitCandidate = function (candidate) {
+        return canFitXiangxiangListItems(testCtx, candidate, group.profile, segmentTypes);
       };
     } else {
       return [content];
@@ -3053,6 +3249,70 @@
     return true;
   }
 
+  function canFitXiangxiangListItems(ctx, items, profile, segmentTypes) {
+    var typography = profile.typography || {};
+    var layout = (profile.layout && profile.layout.page) || {};
+    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var bodySize = typography.bodySize || 45;
+    var bodyWeight = typography.bodyWeight || 500;
+    var leadWeight = typography.leadWeight || 700;
+    var fonts = {
+      regular: String(bodyWeight) + " " + String(bodySize) + "px " + family,
+      lead: String(leadWeight) + " " + String(bodySize) + "px " + family
+    };
+    var colors = {
+      textPrimary: "#111111",
+      textSecondary: "#111111"
+    };
+    var types = Array.isArray(segmentTypes) ? segmentTypes : [];
+    var shouldCheckList = types.length === 0 || types.indexOf("list") >= 0;
+    var shouldCheckTag = types.indexOf("tag") >= 0;
+    var bodyX = typeof layout.bodyX === "number" ? layout.bodyX : 83;
+    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 182;
+    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 909;
+    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1000;
+    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 56;
+    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 20;
+
+    if (shouldCheckList) {
+      var listResult = drawXiangxiangList(
+        ctx,
+        items,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        fonts,
+        colors
+      );
+      if (listResult && listResult.truncated) {
+        return false;
+      }
+    }
+
+    if (shouldCheckTag) {
+      var tagResult = drawXiangxiangTag(
+        ctx,
+        items,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        fonts,
+        colors
+      );
+      if (tagResult && tagResult.truncated) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   function canFitXiaoxingListItems(ctx, items, layout) {
     var y = layout.bodyY;
     var width = layout.bodyWidth;
@@ -3123,6 +3383,10 @@
       drawXiaoxingLabCover(coverCtx, group);
     } else if (group.profile.theme === "banxia") {
       drawBanxiaCover(coverCtx, group);
+    } else if (group.profile.theme === "zhishi") {
+      drawZhishiCover(coverCtx, group);
+    } else if (group.profile.theme === "xiangxiang") {
+      drawXiangxiangCover(coverCtx, group);
     } else if (group.profile.theme === "rifu") {
       drawRifuCover(coverCtx, group);
     } else {
@@ -3151,8 +3415,14 @@
 
       await drawBackground(pageCtx, group, finalType, false, warnings);
 
-      if (group.profile.theme === "xiaoxing_lab" || group.profile.theme === "banxia") {
+      if (
+        group.profile.theme === "xiaoxing_lab" ||
+        group.profile.theme === "banxia" ||
+        group.profile.theme === "zhishi"
+      ) {
         drawXiaoxingLabPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
+      } else if (group.profile.theme === "xiangxiang") {
+        drawXiangxiangPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
       } else if (group.profile.theme === "rifu") {
         drawRifuPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
       } else {
@@ -3935,6 +4205,14 @@
     );
   }
 
+  function drawZhishiCover(ctx, group) {
+    drawRifuCover(ctx, group);
+  }
+
+  function drawXiangxiangCover(ctx, group) {
+    drawRifuCover(ctx, group);
+  }
+
   function drawRifuCover(ctx, group) {
     var profile = group.profile;
     var colors = profile.colors || {};
@@ -4040,6 +4318,228 @@
       centerX - ctx.measureText(secondLine).width / 2,
       box.titleY + box.titleLineHeight
     );
+  }
+
+  function drawXiangxiangPage(ctx, group, page, finalType, warnings) {
+    var profile = group.profile;
+    var colors = profile.colors || {};
+    var typography = profile.typography || {};
+    var layout = profile.layout.page || {};
+    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var fonts = {
+      regular:
+        String(typography.bodyWeight || 500) + " " + String(typography.bodySize || 45) + "px " + family,
+      lead:
+        String(typography.leadWeight || 700) + " " + String(typography.bodySize || 45) + "px " + family
+    };
+    var titleText = sanitizeText(page.title);
+    var titleSize = fitTextFontSize(
+      ctx,
+      titleText,
+      layout.titleWidth,
+      layout.titleMaxLines,
+      typography.pageTitleSize || 60,
+      40,
+      String(typography.pageTitleWeight || 700),
+      family
+    );
+    var result;
+
+    ctx.fillStyle = colors.textPrimary || "#1C1C1C";
+    ctx.font = String(typography.pageTitleWeight || 700) + " " + titleSize + "px " + family;
+    drawWrappedLimited(
+      ctx,
+      titleText,
+      layout.titleX,
+      layout.titleY,
+      layout.titleWidth,
+      layout.titleLineHeight,
+      layout.titleMaxLines,
+      null
+    );
+
+    if (finalType === "list") {
+      result = drawXiangxiangList(
+        ctx,
+        page.items,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        layout.itemGap,
+        fonts,
+        colors
+      );
+    } else if (finalType === "tag") {
+      var tagItems = page.tags.length > 0 ? page.tags : page.items;
+      result = drawXiangxiangTag(
+        ctx,
+        tagItems,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        layout.itemGap,
+        fonts,
+        colors
+      );
+    } else if (finalType === "compare") {
+      result = drawXiangxiangCompare(
+        ctx,
+        page.comparePairs,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        layout.itemGap,
+        fonts,
+        colors
+      );
+    } else {
+      result = drawXiangxiangAutoText(
+        ctx,
+        page.text,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        fonts,
+        colors
+      );
+    }
+
+    if (result && result.truncated) {
+      warnings.add(
+        group.source +
+          " 第 " +
+          page.pageNumber +
+          " 页内容超出高度，已截断。可减少条目或拆分更多页面。"
+      );
+    }
+  }
+
+  function drawXiangxiangList(ctx, items, x, startY, width, maxY, lineHeight, itemGap, fonts, colors) {
+    var y = startY;
+    var truncated = false;
+
+    ctx.fillStyle = colors.textPrimary || "#1C1C1C";
+    ctx.font = fonts.regular;
+
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var lines = splitTextByWidth(ctx, raw, width);
+      var rows = drawLinesWithMaxY(ctx, lines, x, y, lineHeight, maxY);
+      y = rows.nextY;
+
+      if (rows.truncated) {
+        truncated = true;
+        break;
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < items.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawXiangxiangTag(ctx, items, x, startY, width, maxY, lineHeight, itemGap, fonts, colors) {
+    var y = startY;
+    var truncated = false;
+
+    ctx.fillStyle = colors.textPrimary || "#1C1C1C";
+    ctx.font = fonts.regular;
+
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var parsed = splitTagLabel(raw);
+      var text = parsed.label ? parsed.label + parsed.body : raw;
+      var lines = splitTextByWidth(ctx, text, width);
+      var rows = drawLinesWithMaxY(ctx, lines, x, y, lineHeight, maxY);
+      y = rows.nextY;
+
+      if (rows.truncated) {
+        truncated = true;
+        break;
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < items.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawXiangxiangCompare(
+    ctx,
+    pairs,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    itemGap,
+    fonts,
+    colors
+  ) {
+    var y = startY;
+    var truncated = false;
+
+    for (var i = 0; i < pairs.length; i += 1) {
+      var pair = pairs[i];
+      var normal = sanitizeText(pair.normal);
+      var better = sanitizeText(pair.better);
+
+      if (normal) {
+        ctx.fillStyle = colors.textPrimary || "#1C1C1C";
+        ctx.font = fonts.regular;
+        var normalLines = splitTextByWidth(ctx, withAutoSerialIfNeeded(i, normal), width);
+        var normalRows = drawLinesWithMaxY(ctx, normalLines, x, y, lineHeight, maxY);
+        y = normalRows.nextY;
+        if (normalRows.truncated) {
+          truncated = true;
+          break;
+        }
+      }
+
+      if (better) {
+        ctx.fillStyle = colors.textSecondary || colors.textPrimary || "#1C1C1C";
+        ctx.font = fonts.regular;
+        var betterLines = splitTextByWidth(ctx, "优化：" + better, width);
+        var betterRows = drawLinesWithMaxY(ctx, betterLines, x, y, lineHeight, maxY);
+        y = betterRows.nextY;
+        if (betterRows.truncated) {
+          truncated = true;
+          break;
+        }
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < pairs.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawXiangxiangAutoText(ctx, text, x, startY, width, maxY, lineHeight, fonts, colors) {
+    ctx.fillStyle = colors.textPrimary || "#1C1C1C";
+    ctx.font = fonts.regular;
+    var lines = splitTextByWidth(ctx, sanitizeText(text), width);
+    var rows = drawLinesWithMaxY(ctx, lines, x, startY, lineHeight, maxY);
+    return { truncated: rows.truncated };
   }
 
   function drawRifuPage(ctx, group, page, finalType, warnings) {

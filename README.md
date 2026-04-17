@@ -85,6 +85,8 @@ cmd /c npm run xhs:web
 - `xiaoxing_lab`（小星写作实验室，兼容 `xiaoxingxiezuoshiyanshi` / `小星写作实验室`）
 - `rifu`（日富，兼容 `日富` / `日富一日`）
 - `banxia`（半夏，兼容 `半夏` / `半夏416`）
+- `zhishi`（芝士，兼容 `芝士`）
+- `xiangxiang`（香香，兼容 `香香`）
 
 ## file:// 兼容与底图策略
 
@@ -92,6 +94,8 @@ cmd /c npm run xhs:web
 - 普通样式缺底图时，会回退到内置渐变背景并提示。
 - `xiaoxing_lab` 为严格模式：必须使用内嵌底图，不允许兜底背景。
 - `rifu` 与 `banxia` 也为严格模式：必须使用指定底图，不允许兜底背景。
+- `zhishi` 也为严格模式：必须使用指定底图，不允许兜底背景。
+- `xiangxiang` 也为严格模式：必须使用指定底图，不允许兜底背景。
 
 ## 替换底图（assets -> base64）
 
