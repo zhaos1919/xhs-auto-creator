@@ -1,0 +1,5 @@
+﻿Status=渲染完成：共 1 组。
+Error=
+Warning=
+ResultCountLabel=1 组
+SavedImages=9

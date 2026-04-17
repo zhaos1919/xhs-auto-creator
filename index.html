@@ -1,0 +1,110 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xhs-render-web | 纯前端本地渲染</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <main class="layout">
+    <section class="panel controls">
+      <h1>xhs-render-web</h1>
+      <p class="subtitle">纯网页本地渲染工具（无 Python、无后端、支持 file://）</p>
+
+      <div class="field">
+        <label for="jsonInput">粘贴 JSON / 宽松 JSON</label>
+        <textarea id="jsonInput" rows="16" placeholder='{
+  "style": "banxia",
+  "cover_title": "标题",
+  "pages": []
+}'></textarea>
+      </div>
+
+      <section class="doubao-box">
+        <h3 class="module-title">主题生成 JSON（豆包）</h3>
+
+        <div class="field">
+          <label for="doubaoApiKey">豆包 API Key</label>
+          <input id="doubaoApiKey" type="password" placeholder="请输入火山方舟 API Key">
+        </div>
+
+        <div class="field">
+          <label for="doubaoBaseUrl">豆包 Base URL</label>
+          <input id="doubaoBaseUrl" type="text" value="https://ark.cn-beijing.volces.com/api/v3">
+        </div>
+
+        <div class="field">
+          <label for="doubaoModel">豆包 模型/接入点ID</label>
+          <input id="doubaoModel" type="text" placeholder="例如：ep-xxxx-xxxx">
+        </div>
+
+        <div class="field">
+          <label for="doubaoTopic">主题（支持多行批量，一行一个主题）</label>
+          <textarea id="doubaoTopic" rows="6" placeholder="30个郡主封号
+20个公主称号
+50个杀手代号"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="doubaoPageCount">生成图片页数</label>
+          <select id="doubaoPageCount">
+            <option value="4">4 页</option>
+            <option value="5" selected>5 页</option>
+            <option value="6">6 页</option>
+            <option value="7">7 页</option>
+            <option value="8">8 页</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="doubaoLayoutStyle">生成排版风格</label>
+          <select id="doubaoLayoutStyle">
+            <option value="xiaoxing_lab" selected>小星写作实验室（xiaoxing_lab）</option>
+            <option value="banxia">半夏（banxia）</option>
+            <option value="rifu">日富（rifu）</option>
+            <option value="xiaoxing">小星（xiaoxing）</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button id="doubaoGenerateBtn" type="button" class="btn btn-secondary">根据主题生成 JSON（豆包）</button>
+        </div>
+      </section>
+
+      <div class="field">
+        <label for="jsonFiles">选择 JSON/TXT 文件（支持多选）</label>
+        <input id="jsonFiles" type="file" accept=".json,.txt,application/json,text/plain" multiple>
+      </div>
+
+      <div class="field">
+        <label for="jsonFolder">选择 JSON/TXT 文件夹</label>
+        <input id="jsonFolder" type="file" webkitdirectory directory multiple>
+      </div>
+
+      <div class="actions">
+        <button id="fillSampleBtn" type="button" class="btn btn-secondary">填充示例</button>
+        <button id="clearBtn" type="button" class="btn btn-ghost">清空</button>
+        <button id="renderBtn" type="button" class="btn btn-primary">开始渲染</button>
+      </div>
+
+      <div id="statusBox" class="status muted">等待输入</div>
+      <div id="errorBox" class="errors" aria-live="polite"></div>
+      <div id="warningBox" class="warnings" aria-live="polite"></div>
+    </section>
+
+    <section class="panel preview">
+      <div class="preview-head">
+        <h2>预览与下载</h2>
+        <span id="resultCount" class="result-count">0 组</span>
+      </div>
+      <div id="resultList" class="result-list"></div>
+    </section>
+  </main>
+
+  <script src="embedded-backgrounds.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

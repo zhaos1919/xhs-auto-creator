@@ -1,0 +1,12 @@
+{
+  "name": "xhs-render-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pure web local renderer for Xiaohongshu-style images. No Python, no backend.",
+  "scripts": {
+    "xhs:web": "start \"\" \"index.html\"",
+    "xhs:embed": "node scripts/embed-backgrounds.js",
+    "check": "node --check app.js && node --check embedded-backgrounds.js && node --check scripts/embed-backgrounds.js"
+  },
+  "license": "MIT"
+}

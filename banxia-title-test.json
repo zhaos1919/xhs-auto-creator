@@ -1,0 +1,12 @@
+﻿{
+  "style": "banxia",
+  "cover_top_text": "写小说可用的",
+  "cover_title": "“神性悲悯台词”",
+  "pages": [
+    {"type":"list","title":"第1页","items":["a"]},
+    {"type":"list","title":"第2页","items":["b"]},
+    {"type":"list","title":"第3页","items":["c"]},
+    {"type":"list","title":"第4页","items":["d"]},
+    {"type":"list","title":"第5页","items":["e"]}
+  ]
+}
