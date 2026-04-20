@@ -704,43 +704,43 @@
       id: "xiaoxing_lab",
       name: "Xiaoxing Lab",
       theme: "xiaoxing_lab",
+      coverHeaderText: "小/说/素/材/分/享",
       background: {
         styleKey: "xiaoxing_lab",
         allowFallback: false
       },
       colors: {
-        textPrimary: "#111111",
-        textSecondary: "#171717",
-        ornamentDark: "#2E3335",
-        ornamentLight: "#8A8F8D"
+        textPrimary: "#16121E",
+        textSecondary: "#201B28",
+        ornamentDark: "#DFA8C8",
+        ornamentLight: "#D77DB2"
       },
       ornaments: {
-        topLeftDotsX: 76,
-        topLeftDotsY: 103,
-        topLeftDotRadius: 7,
-        topLeftDotGap: 19,
-        topLeftDotLineWidth: 2,
-        topRightQuoteX: 964,
-        topRightQuoteY: 134,
-        topRightQuoteFontSize: 96,
-        bottomLeftQuoteX: 74,
-        bottomLeftQuoteY: 1368,
-        bottomLeftQuoteFontSize: 96,
-        bottomLineX1: 160,
-        bottomLineX2: 989,
-        bottomLineY: 1407,
-        bottomLineWidth: 2.5
+        topLeftStarX: 128,
+        topLeftStarY: 200,
+        topLeftStarFontSize: 110,
+        bottomLeftStarX: -52,
+        bottomLeftStarY: 1510,
+        bottomLeftStarFontSize: 280,
+        bottomRightAmpX: 866,
+        bottomRightAmpY: 1364,
+        bottomRightAmpFontSize: 96
       },
       layout: {
         cover: {
-          topTextX: 124,
-          topTextY: 530,
-          topTextWidth: 828,
+          headerX: 132,
+          headerY: 286,
+          headerWidth: 430,
+          headerLineHeight: 58,
+          headerMaxLines: 1,
+          topTextX: 126,
+          topTextY: 562,
+          topTextWidth: 660,
           topTextLineHeight: 86,
           topTextMaxLines: 1,
-          titleX: 82,
-          titleY: 722,
-          titleWidth: 922,
+          titleCenterX: 540,
+          titleY: 812,
+          titleWidth: 760,
           titleLineHeight: 122,
           titleMaxLines: 2,
           subtitleX: 108,
@@ -986,6 +986,132 @@
           itemGap: 20
         }
       }
+    },
+    tailun: {
+      id: "tailun",
+      name: "Tailun",
+      theme: "tailun",
+      coverSubtitle: "小说素材｜干货分享",
+      background: {
+        styleKey: "tailun",
+        allowFallback: false
+      },
+      colors: {
+        textPrimary: "#231A2A",
+        textSecondary: "#2F2735",
+        textAccent: "#B24F67"
+      },
+      typography: {
+        fontFamily: "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif",
+        coverTopSize: 58,
+        coverTopWeight: 500,
+        coverTitleStartSize: 122,
+        coverTitleMinSize: 74,
+        coverTitleWeight: 700,
+        coverSubtitleStartSize: 52,
+        coverSubtitleMinSize: 40,
+        coverSubtitleWeight: 500,
+        pageTitleSize: 60,
+        pageTitleWeight: 700,
+        bodySize: 42,
+        bodyWeight: 500,
+        leadSize: 45,
+        leadWeight: 700
+      },
+      layout: {
+        cover: {
+          topTextX: 132,
+          topTextY: 510,
+          topTextWidth: 492,
+          topTextLineHeight: 66,
+          topTextMaxLines: 1,
+          titleCenterX: 540,
+          titleY: 736,
+          titleWidth: 882,
+          titleLineHeight: 108,
+          titleMaxLines: 2,
+          subtitleCenterX: 540,
+          subtitleY: 1318,
+          subtitleWidth: 450,
+          subtitleLineHeight: 58,
+          subtitleMaxLines: 1
+        },
+        page: {
+          titleX: 56,
+          titleY: 98,
+          titleWidth: 968,
+          titleLineHeight: 72,
+          titleMaxLines: 2,
+          bodyX: 56,
+          bodyY: 172,
+          bodyWidth: 968,
+          bodyMaxY: 1060,
+          itemLineHeight: 52,
+          itemGap: 14,
+          leadBodyGap: 8
+        }
+      }
+    },
+    xibo: {
+      id: "xibo",
+      name: "Xibo",
+      theme: "xibo",
+      coverSubtitle: "小说素材、干货分享",
+      background: {
+        styleKey: "xibo",
+        allowFallback: false
+      },
+      colors: {
+        textPrimary: "#0A0A0A",
+        textSecondary: "#0A0A0A"
+      },
+      typography: {
+        fontFamily: "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif",
+        coverTitleFontFamily: "'STKaiti', 'KaiTi', 'Kaiti SC', 'STSong', serif",
+        coverTopSize: 58,
+        coverTopWeight: 500,
+        coverTitleStartSize: 184,
+        coverTitleMinSize: 114,
+        coverTitleWeight: 700,
+        coverSubtitleStartSize: 62,
+        coverSubtitleMinSize: 42,
+        coverSubtitleWeight: 500,
+        pageTitleSize: 58,
+        pageTitleWeight: 700,
+        bodySize: 48,
+        bodyWeight: 500,
+        leadSize: 48,
+        leadWeight: 700
+      },
+      layout: {
+        cover: {
+          topTextX: 34,
+          topTextY: 426,
+          topTextWidth: 520,
+          topTextLineHeight: 74,
+          topTextMaxLines: 1,
+          titleCenterX: 540,
+          titleY: 804,
+          titleWidth: 860,
+          titleLineHeight: 132,
+          titleMaxLines: 2,
+          subtitleCenterX: 540,
+          subtitleY: 1248,
+          subtitleWidth: 620,
+          subtitleLineHeight: 72,
+          subtitleMaxLines: 1
+        },
+        page: {
+          showTitle: false,
+          bodyX: 38,
+          bodyY: 68,
+          bodyWidth: 894,
+          bodyMaxY: 1265,
+          itemLineHeight: 72,
+          itemGap: 60,
+          leadBodyGap: 10
+        }
+      }
     }
   });
 
@@ -1017,7 +1143,15 @@
     xiangxiang: "xiangxiang",
     xiang_xiang: "xiangxiang",
     "xiang-xiang": "xiangxiang",
-    "香香": "xiangxiang"
+    "香香": "xiangxiang",
+    tailun: "tailun",
+    tai_lun: "tailun",
+    "tai-lun": "tailun",
+    "泰仑": "tailun",
+    xibo: "xibo",
+    xi_bo: "xibo",
+    "xi-bo": "xibo",
+    "喜播": "xibo"
   });
 
   var imageCache = new Map();
@@ -2589,7 +2723,7 @@
     var mappedStyle = mapStyleAlias(styleInput) || mapStyleAlias(contentStyleInput);
     if (!mappedStyle || !STYLE_PROFILES[mappedStyle]) {
       throw new Error(
-        "style 无效。当前支持：xiaoxing（小星）、xiaoxing_lab（小星写作实验室）、rifu（日富）、banxia（半夏）、zhishi（芝士）、xiangxiang（香香）。"
+        "style 无效。当前支持：xiaoxing（小星）、xiaoxing_lab（小星写作实验室）、rifu（日富）、banxia（半夏）、zhishi（芝士）、xiangxiang（香香）、tailun（泰仑）、xibo（喜播）。"
       );
     }
 
@@ -3004,7 +3138,9 @@
       group.profile.theme !== "rifu" &&
       group.profile.theme !== "banxia" &&
       group.profile.theme !== "zhishi" &&
-      group.profile.theme !== "xiangxiang"
+      group.profile.theme !== "xiangxiang" &&
+      group.profile.theme !== "tailun" &&
+      group.profile.theme !== "xibo"
     ) {
       return group.pages.slice();
     }
@@ -3138,6 +3274,14 @@
     } else if (group.profile.theme === "xiangxiang") {
       canFitCandidate = function (candidate) {
         return canFitXiangxiangListItems(testCtx, candidate, group.profile, segmentTypes);
+      };
+    } else if (group.profile.theme === "tailun") {
+      canFitCandidate = function (candidate) {
+        return canFitTailunListItems(testCtx, candidate, group.profile, segmentTypes);
+      };
+    } else if (group.profile.theme === "xibo") {
+      canFitCandidate = function (candidate) {
+        return canFitXiboListItems(testCtx, candidate, group.profile, segmentTypes);
       };
     } else {
       return [content];
@@ -3313,6 +3457,143 @@
     return true;
   }
 
+  function canFitTailunListItems(ctx, items, profile, segmentTypes) {
+    var typography = profile.typography || {};
+    var layout = (profile.layout && profile.layout.page) || {};
+    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var bodySize = typography.bodySize || 42;
+    var bodyWeight = typography.bodyWeight || 500;
+    var leadSize = typography.leadSize || bodySize;
+    var leadWeight = typography.leadWeight || 700;
+    var fonts = {
+      regular: String(bodyWeight) + " " + String(bodySize) + "px " + family,
+      lead: String(leadWeight) + " " + String(leadSize) + "px " + family
+    };
+    var colors = {
+      textPrimary: "#231A2A",
+      textSecondary: "#2F2735",
+      textAccent: "#B24F67"
+    };
+    var types = Array.isArray(segmentTypes) ? segmentTypes : [];
+    var shouldCheckList = types.length === 0 || types.indexOf("list") >= 0;
+    var shouldCheckTag = types.indexOf("tag") >= 0;
+    var bodyX = typeof layout.bodyX === "number" ? layout.bodyX : 56;
+    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 172;
+    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 968;
+    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1060;
+    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 52;
+    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 14;
+    var leadBodyGap = typeof layout.leadBodyGap === "number" ? layout.leadBodyGap : 8;
+
+    if (shouldCheckList) {
+      var listResult = drawTailunList(
+        ctx,
+        items,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+      if (listResult && listResult.truncated) {
+        return false;
+      }
+    }
+
+    if (shouldCheckTag) {
+      var tagResult = drawTailunTag(
+        ctx,
+        items,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+      if (tagResult && tagResult.truncated) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function canFitXiboListItems(ctx, items, profile, segmentTypes) {
+    var typography = profile.typography || {};
+    var layout = (profile.layout && profile.layout.page) || {};
+    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var bodySize = typography.bodySize || 48;
+    var bodyWeight = typography.bodyWeight || 500;
+    var leadSize = typography.leadSize || bodySize;
+    var leadWeight = typography.leadWeight || 700;
+    var fonts = {
+      regular: String(bodyWeight) + " " + String(bodySize) + "px " + family,
+      lead: String(leadWeight) + " " + String(leadSize) + "px " + family
+    };
+    var colors = {
+      textPrimary: "#0A0A0A",
+      textSecondary: "#0A0A0A"
+    };
+    var types = Array.isArray(segmentTypes) ? segmentTypes : [];
+    var shouldCheckList = types.length === 0 || types.indexOf("list") >= 0;
+    var shouldCheckTag = types.indexOf("tag") >= 0;
+    var bodyX = typeof layout.bodyX === "number" ? layout.bodyX : 38;
+    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 68;
+    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 894;
+    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1265;
+    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 72;
+    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 60;
+    var leadBodyGap = typeof layout.leadBodyGap === "number" ? layout.leadBodyGap : 10;
+
+    if (shouldCheckList) {
+      var listResult = drawXiboList(
+        ctx,
+        items,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+      if (listResult && listResult.truncated) {
+        return false;
+      }
+    }
+
+    if (shouldCheckTag) {
+      var tagResult = drawXiboTag(
+        ctx,
+        items,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+      if (tagResult && tagResult.truncated) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   function canFitXiaoxingListItems(ctx, items, layout) {
     var y = layout.bodyY;
     var width = layout.bodyWidth;
@@ -3387,6 +3668,10 @@
       drawZhishiCover(coverCtx, group);
     } else if (group.profile.theme === "xiangxiang") {
       drawXiangxiangCover(coverCtx, group);
+    } else if (group.profile.theme === "tailun") {
+      drawTailunCover(coverCtx, group);
+    } else if (group.profile.theme === "xibo") {
+      drawXiboCover(coverCtx, group);
     } else if (group.profile.theme === "rifu") {
       drawRifuCover(coverCtx, group);
     } else {
@@ -3423,6 +3708,10 @@
         drawXiaoxingLabPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
       } else if (group.profile.theme === "xiangxiang") {
         drawXiangxiangPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
+      } else if (group.profile.theme === "tailun") {
+        drawTailunPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
+      } else if (group.profile.theme === "xibo") {
+        drawXiboPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
       } else if (group.profile.theme === "rifu") {
         drawRifuPage(pageCtx, renderGroup, preparedPage, finalType, warnings);
       } else {
@@ -3762,43 +4051,73 @@
   function drawXiaoxingLabDecor(ctx, profile) {
     var decor = profile.ornaments;
     var colors = profile.colors;
+    var symbolFamily = "'Arial Black', 'PingFang SC', 'Microsoft YaHei', sans-serif";
+    var topColor = colors.ornamentLight || "#D77DB2";
+    var bottomColor = colors.ornamentDark || "#DFA8C8";
 
-    ctx.strokeStyle = colors.ornamentLight;
-    ctx.lineWidth = decor.topLeftDotLineWidth;
-    for (var i = 0; i < 3; i += 1) {
-      var dotX = decor.topLeftDotsX + i * decor.topLeftDotGap;
-      ctx.beginPath();
-      ctx.arc(dotX, decor.topLeftDotsY, decor.topLeftDotRadius, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+    ctx.fillStyle = topColor;
+    ctx.font = "700 " + String(decor.topLeftStarFontSize || 110) + "px " + symbolFamily;
+    ctx.fillText("*", decor.topLeftStarX || 128, decor.topLeftStarY || 200);
 
-    ctx.fillStyle = colors.textPrimary;
-    ctx.font = "700 " + decor.topRightQuoteFontSize + "px 'STSong', 'Noto Serif SC', serif";
-    ctx.fillText("”", decor.topRightQuoteX, decor.topRightQuoteY);
+    ctx.fillStyle = bottomColor;
+    ctx.font = "700 " + String(decor.bottomLeftStarFontSize || 280) + "px " + symbolFamily;
+    ctx.fillText("*", decor.bottomLeftStarX || -52, decor.bottomLeftStarY || 1510);
 
-    ctx.fillStyle = colors.textPrimary;
-    ctx.font = "700 " + decor.bottomLeftQuoteFontSize + "px 'STSong', 'Noto Serif SC', serif";
-    ctx.fillText("“", decor.bottomLeftQuoteX, decor.bottomLeftQuoteY);
-
-    ctx.strokeStyle = colors.ornamentDark;
-    ctx.lineWidth = decor.bottomLineWidth;
-    ctx.beginPath();
-    ctx.moveTo(decor.bottomLineX1, decor.bottomLineY);
-    ctx.lineTo(decor.bottomLineX2, decor.bottomLineY);
-    ctx.stroke();
+    ctx.fillStyle = topColor;
+    ctx.font = "700 " + String(decor.bottomRightAmpFontSize || 96) + "px " + symbolFamily;
+    ctx.fillText("&", decor.bottomRightAmpX || 866, decor.bottomRightAmpY || 1364);
   }
 
   function drawXiaoxingLabCover(ctx, group) {
     var profile = group.profile;
     var colors = profile.colors;
     var box = profile.layout.cover;
+    var family = "'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif";
     var topText = sanitizeText(group.coverTopText);
     var title = sanitizeText(group.coverTitle);
-    var subtitle = sanitizeText(group.coverSubtitle || "小说素材、干货分享");
+    var headerText = formatXiaoxingLabCoverHeaderText(
+      group.coverSubtitle,
+      profile.coverHeaderText || "小/说/素/材/分/享"
+    );
+
+    if (headerText) {
+      var headerSize = fitTextFontSize(
+        ctx,
+        headerText,
+        box.headerWidth || 430,
+        box.headerMaxLines || 1,
+        56,
+        42,
+        "500",
+        family
+      );
+      ctx.fillStyle = colors.textSecondary || colors.textPrimary;
+      ctx.font = "500 " + headerSize + "px " + family;
+      drawWrappedLimited(
+        ctx,
+        headerText,
+        box.headerX || 132,
+        box.headerY || 286,
+        box.headerWidth || 430,
+        box.headerLineHeight || 58,
+        box.headerMaxLines || 1,
+        null
+      );
+    }
 
     if (topText) {
+      var topSize = fitTextFontSize(
+        ctx,
+        topText,
+        box.topTextWidth || 660,
+        box.topTextMaxLines || 1,
+        76,
+        54,
+        "700",
+        family
+      );
       ctx.fillStyle = colors.textPrimary;
-      ctx.font = "700 80px 'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+      ctx.font = "700 " + topSize + "px " + family;
       drawWrappedLimited(
         ctx,
         topText,
@@ -3812,30 +4131,6 @@
     }
 
     drawXiaoxingLabCoverTitle(ctx, title, box, colors);
-
-    var subtitleSize = fitTextFontSize(
-      ctx,
-      subtitle,
-      box.subtitleWidth,
-      box.subtitleMaxLines,
-      60,
-      46,
-      "600",
-      "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif"
-    );
-    ctx.fillStyle = colors.textSecondary;
-    ctx.font =
-      "600 " + subtitleSize + "px 'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
-    drawWrappedLimited(
-      ctx,
-      subtitle,
-      box.subtitleX,
-      box.subtitleY,
-      box.subtitleWidth,
-      box.subtitleLineHeight,
-      box.subtitleMaxLines,
-      null
-    );
   }
 
   function drawXiaoxingLabCoverTitle(ctx, rawTitle, box, colors) {
@@ -3844,30 +4139,40 @@
       return;
     }
 
-    var fontFamily = "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var fontFamily = "'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif";
     var maxWidth = box.titleWidth;
+    var centerX = box.titleCenterX || null;
     var openQuote = "“";
     var closeQuote = "”";
-    var singleLineSize = findSingleLineCoverTitleSize(ctx, title, maxWidth, 132, 100, fontFamily);
+    var singleLineSize = findSingleLineCoverTitleSize(ctx, title, maxWidth, 128, 90, fontFamily);
 
     ctx.fillStyle = colors.textPrimary;
 
     if (singleLineSize) {
       ctx.font = "700 " + singleLineSize + "px " + fontFamily;
-      ctx.fillText(openQuote + title + closeQuote, box.titleX, box.titleY);
+      var singleText = openQuote + title + closeQuote;
+      var singleX = typeof centerX === "number" ? centerX - ctx.measureText(singleText).width / 2 : box.titleX;
+      ctx.fillText(singleText, singleX, box.titleY);
       return;
     }
 
-    var twoLineLayout = fitTwoLineQuotedCoverTitle(ctx, title, maxWidth, 132, 94, fontFamily);
+    var twoLineLayout = fitTwoLineQuotedCoverTitle(ctx, title, maxWidth, 128, 84, fontFamily);
     ctx.font = "700 " + twoLineLayout.fontSize + "px " + fontFamily;
     if (!twoLineLayout.lines[1]) {
-      ctx.fillText(openQuote + twoLineLayout.lines[0] + closeQuote, box.titleX, box.titleY);
+      var fallbackText = openQuote + twoLineLayout.lines[0] + closeQuote;
+      var fallbackX =
+        typeof centerX === "number" ? centerX - ctx.measureText(fallbackText).width / 2 : box.titleX;
+      ctx.fillText(fallbackText, fallbackX, box.titleY);
       return;
     }
-    ctx.fillText(openQuote + twoLineLayout.lines[0], box.titleX, box.titleY);
+    var firstLine = openQuote + twoLineLayout.lines[0];
+    var secondLine = twoLineLayout.lines[1] + closeQuote;
+    var firstX = typeof centerX === "number" ? centerX - ctx.measureText(firstLine).width / 2 : box.titleX;
+    var secondX = typeof centerX === "number" ? centerX - ctx.measureText(secondLine).width / 2 : box.titleX;
+    ctx.fillText(firstLine, firstX, box.titleY);
     ctx.fillText(
-      twoLineLayout.lines[1] + closeQuote,
-      box.titleX,
+      secondLine,
+      secondX,
       box.titleY + box.titleLineHeight
     );
   }
@@ -4213,6 +4518,85 @@
     drawRifuCover(ctx, group);
   }
 
+  function drawTailunCover(ctx, group) {
+    drawRifuCover(ctx, group);
+  }
+
+  function drawXiboCover(ctx, group) {
+    var profile = group.profile;
+    var colors = profile.colors || {};
+    var typography = profile.typography || {};
+    var box = profile.layout.cover || {};
+    var baseFamily = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var titleFamily = typography.coverTitleFontFamily || baseFamily;
+    var topText = sanitizeText(group.coverTopText);
+    var title = sanitizeText(group.coverTitle);
+    var subtitle = sanitizeText(group.coverSubtitle || profile.coverSubtitle || "小说素材、干货分享");
+    var topWeight = typography.coverTopWeight || 500;
+    var subtitleWeight = typography.coverSubtitleWeight || 500;
+
+    if (topText) {
+      var topSize = fitTextFontSize(
+        ctx,
+        topText,
+        box.topTextWidth,
+        box.topTextMaxLines,
+        typography.coverTopSize || 58,
+        42,
+        String(topWeight),
+        baseFamily
+      );
+      ctx.fillStyle = colors.textSecondary || colors.textPrimary || "#0A0A0A";
+      ctx.font = String(topWeight) + " " + topSize + "px " + baseFamily;
+      drawWrappedLimited(
+        ctx,
+        topText,
+        box.topTextX,
+        box.topTextY,
+        box.topTextWidth,
+        box.topTextLineHeight,
+        box.topTextMaxLines,
+        null
+      );
+    }
+
+    drawRifuCoverTitle(
+      ctx,
+      title,
+      box,
+      Object.assign({}, typography, {
+        fontFamily: titleFamily
+      }),
+      {
+        textPrimary: colors.textPrimary || "#0A0A0A",
+        textSecondary: colors.textSecondary || colors.textPrimary || "#0A0A0A"
+      }
+    );
+
+    var subtitleSize = fitTextFontSize(
+      ctx,
+      subtitle,
+      box.subtitleWidth,
+      box.subtitleMaxLines,
+      typography.coverSubtitleStartSize || 62,
+      typography.coverSubtitleMinSize || 42,
+      String(subtitleWeight),
+      baseFamily
+    );
+    ctx.fillStyle = colors.textPrimary || "#0A0A0A";
+    ctx.font = String(subtitleWeight) + " " + subtitleSize + "px " + baseFamily;
+    drawWrappedLimited(
+      ctx,
+      subtitle,
+      Math.round((box.subtitleCenterX || CANVAS_WIDTH / 2) - box.subtitleWidth / 2),
+      box.subtitleY,
+      box.subtitleWidth,
+      box.subtitleLineHeight,
+      box.subtitleMaxLines,
+      null
+    );
+  }
+
   function drawRifuCover(ctx, group) {
     var profile = group.profile;
     var colors = profile.colors || {};
@@ -4540,6 +4924,743 @@
     var lines = splitTextByWidth(ctx, sanitizeText(text), width);
     var rows = drawLinesWithMaxY(ctx, lines, x, startY, lineHeight, maxY);
     return { truncated: rows.truncated };
+  }
+
+  function drawXiboPage(ctx, group, page, finalType, warnings) {
+    var profile = group.profile;
+    var colors = profile.colors || {};
+    var typography = profile.typography || {};
+    var layout = profile.layout.page || {};
+    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var fonts = {
+      regular:
+        String(typography.bodyWeight || 500) + " " + String(typography.bodySize || 48) + "px " + family,
+      lead:
+        String(typography.leadWeight || 700) +
+        " " +
+        String(typography.leadSize || typography.bodySize || 48) +
+        "px " +
+        family
+    };
+    var result;
+    var bodyX = typeof layout.bodyX === "number" ? layout.bodyX : 38;
+    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 68;
+    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 894;
+    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1265;
+    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 72;
+    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 60;
+    var leadBodyGap = typeof layout.leadBodyGap === "number" ? layout.leadBodyGap : 10;
+
+    if (finalType === "list") {
+      result = drawXiboList(
+        ctx,
+        page.items,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+    } else if (finalType === "tag") {
+      var tagItems = page.tags.length > 0 ? page.tags : page.items;
+      result = drawXiboTag(
+        ctx,
+        tagItems,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+    } else if (finalType === "compare") {
+      result = drawXiboCompare(
+        ctx,
+        page.comparePairs,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+    } else {
+      result = drawXiboAutoText(
+        ctx,
+        page.text,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        fonts,
+        colors
+      );
+    }
+
+    if (result && result.truncated) {
+      warnings.add(
+        group.source +
+          " 第 " +
+          page.pageNumber +
+          " 页内容超出高度，已截断。可减少条目或拆分更多页面。"
+      );
+    }
+  }
+
+  function drawXiboList(
+    ctx,
+    items,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    itemGap,
+    leadBodyGap,
+    fonts,
+    colors
+  ) {
+    var y = startY;
+    var truncated = false;
+
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var parsed = splitHeadingAndBody(raw);
+      var lead = parsed.body ? parsed.heading : "";
+      var body = parsed.body ? parsed.body : raw;
+      var block = drawXiboLeadBodyBlock(
+        ctx,
+        lead,
+        body,
+        x,
+        y,
+        width,
+        maxY,
+        lineHeight,
+        leadBodyGap,
+        fonts,
+        colors,
+        colors.textPrimary || "#0A0A0A"
+      );
+      y = block.nextY;
+
+      if (block.truncated) {
+        truncated = true;
+        break;
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < items.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawXiboTag(
+    ctx,
+    items,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    itemGap,
+    leadBodyGap,
+    fonts,
+    colors
+  ) {
+    var y = startY;
+    var truncated = false;
+
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var parsedTag = splitTagLabel(raw);
+      var lead = "";
+      var body = raw;
+
+      if (parsedTag.label) {
+        lead = parsedTag.label;
+        body = parsedTag.body;
+      } else {
+        var parsedHeading = splitHeadingAndBody(raw);
+        if (parsedHeading.body) {
+          lead = parsedHeading.heading;
+          body = parsedHeading.body;
+        }
+      }
+
+      var block = drawXiboLeadBodyBlock(
+        ctx,
+        lead,
+        body,
+        x,
+        y,
+        width,
+        maxY,
+        lineHeight,
+        leadBodyGap,
+        fonts,
+        colors,
+        colors.textPrimary || "#0A0A0A"
+      );
+      y = block.nextY;
+
+      if (block.truncated) {
+        truncated = true;
+        break;
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < items.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawXiboCompare(
+    ctx,
+    pairs,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    itemGap,
+    leadBodyGap,
+    fonts,
+    colors
+  ) {
+    var y = startY;
+    var truncated = false;
+
+    for (var i = 0; i < pairs.length; i += 1) {
+      var pair = pairs[i];
+      var normal = sanitizeText(pair.normal);
+      var better = sanitizeText(pair.better);
+
+      if (normal) {
+        var normalBlock = drawXiboLeadBodyBlock(
+          ctx,
+          "普通：",
+          normal,
+          x,
+          y,
+          width,
+          maxY,
+          lineHeight,
+          leadBodyGap,
+          fonts,
+          colors,
+          colors.textPrimary || "#0A0A0A"
+        );
+        y = normalBlock.nextY;
+        if (normalBlock.truncated) {
+          truncated = true;
+          break;
+        }
+      }
+
+      if (better) {
+        var betterBlock = drawXiboLeadBodyBlock(
+          ctx,
+          "优化：",
+          better,
+          x,
+          y,
+          width,
+          maxY,
+          lineHeight,
+          leadBodyGap,
+          fonts,
+          colors,
+          colors.textSecondary || colors.textPrimary || "#0A0A0A"
+        );
+        y = betterBlock.nextY;
+        if (betterBlock.truncated) {
+          truncated = true;
+          break;
+        }
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < pairs.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawXiboAutoText(ctx, text, x, startY, width, maxY, lineHeight, fonts, colors) {
+    ctx.fillStyle = colors.textPrimary || "#0A0A0A";
+    ctx.font = fonts.regular;
+    var lines = splitTextByWidth(ctx, sanitizeText(text), width);
+    var rows = drawLinesWithMaxY(ctx, lines, x, startY, lineHeight, maxY);
+    return { truncated: rows.truncated };
+  }
+
+  function drawXiboLeadBodyBlock(
+    ctx,
+    lead,
+    body,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    leadBodyGap,
+    fonts,
+    colors,
+    color
+  ) {
+    var leadText = sanitizeText(lead);
+    var bodyText = sanitizeText(body);
+    var activeColor = color || colors.textPrimary || "#0A0A0A";
+    var y = startY;
+
+    if (!leadText && !bodyText) {
+      return {
+        nextY: y,
+        truncated: false
+      };
+    }
+
+    if (leadText) {
+      ctx.fillStyle = activeColor;
+      ctx.font = fonts.lead;
+      var leadRows = drawLinesWithMaxY(ctx, splitTextByWidth(ctx, leadText, width), x, y, lineHeight, maxY);
+      y = leadRows.nextY;
+      if (leadRows.truncated) {
+        return {
+          nextY: y,
+          truncated: true
+        };
+      }
+      if (bodyText) {
+        y += leadBodyGap;
+      }
+    }
+
+    if (!bodyText) {
+      return {
+        nextY: y,
+        truncated: false
+      };
+    }
+
+    if (y > maxY) {
+      return {
+        nextY: y,
+        truncated: true
+      };
+    }
+
+    ctx.fillStyle = activeColor;
+    ctx.font = fonts.regular;
+    var bodyRows = drawLinesWithMaxY(ctx, splitTextByWidth(ctx, bodyText, width), x, y, lineHeight, maxY);
+    return {
+      nextY: bodyRows.nextY,
+      truncated: bodyRows.truncated
+    };
+  }
+
+  function drawTailunPage(ctx, group, page, finalType, warnings) {
+    var profile = group.profile;
+    var colors = profile.colors || {};
+    var typography = profile.typography || {};
+    var layout = profile.layout.page || {};
+    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var fonts = {
+      regular:
+        String(typography.bodyWeight || 500) + " " + String(typography.bodySize || 42) + "px " + family,
+      lead:
+        String(typography.leadWeight || 700) + " " + String(typography.leadSize || typography.bodySize || 42) + "px " + family
+    };
+    var titleText = sanitizeText(page.title);
+    var titleSize = fitTextFontSize(
+      ctx,
+      titleText,
+      layout.titleWidth,
+      layout.titleMaxLines,
+      typography.pageTitleSize || 60,
+      40,
+      String(typography.pageTitleWeight || 700),
+      family
+    );
+    var result;
+    var leadBodyGap = typeof layout.leadBodyGap === "number" ? layout.leadBodyGap : 8;
+
+    ctx.fillStyle = colors.textPrimary || "#231A2A";
+    ctx.font = String(typography.pageTitleWeight || 700) + " " + titleSize + "px " + family;
+    drawWrappedLimited(
+      ctx,
+      titleText,
+      layout.titleX,
+      layout.titleY,
+      layout.titleWidth,
+      layout.titleLineHeight,
+      layout.titleMaxLines,
+      null
+    );
+
+    if (finalType === "list") {
+      result = drawTailunList(
+        ctx,
+        page.items,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        layout.itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+    } else if (finalType === "tag") {
+      var tagItems = page.tags.length > 0 ? page.tags : page.items;
+      result = drawTailunTag(
+        ctx,
+        tagItems,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        layout.itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+    } else if (finalType === "compare") {
+      result = drawTailunCompare(
+        ctx,
+        page.comparePairs,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        layout.itemGap,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+    } else {
+      result = drawTailunAutoText(
+        ctx,
+        page.text,
+        layout.bodyX,
+        layout.bodyY,
+        layout.bodyWidth,
+        layout.bodyMaxY,
+        layout.itemLineHeight,
+        fonts,
+        colors
+      );
+    }
+
+    if (result && result.truncated) {
+      warnings.add(
+        group.source +
+          " 第 " +
+          page.pageNumber +
+          " 页内容超出高度，已截断。可减少条目或拆分更多页面。"
+      );
+    }
+  }
+
+  function drawTailunList(
+    ctx,
+    items,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    itemGap,
+    leadBodyGap,
+    fonts,
+    colors
+  ) {
+    var y = startY;
+    var truncated = false;
+
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var pair = splitTailunLeadBody(raw);
+      var block = drawTailunLeadBodyBlock(
+        ctx,
+        pair.lead,
+        pair.body,
+        x,
+        y,
+        width,
+        maxY,
+        lineHeight,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+      y = block.nextY;
+
+      if (block.truncated) {
+        truncated = true;
+        break;
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < items.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawTailunTag(
+    ctx,
+    items,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    itemGap,
+    leadBodyGap,
+    fonts,
+    colors
+  ) {
+    var y = startY;
+    var truncated = false;
+
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var tagParsed = splitTagLabel(raw);
+      var block = drawTailunLeadBodyBlock(
+        ctx,
+        tagParsed.label,
+        tagParsed.body,
+        x,
+        y,
+        width,
+        maxY,
+        lineHeight,
+        leadBodyGap,
+        fonts,
+        colors
+      );
+      y = block.nextY;
+
+      if (block.truncated) {
+        truncated = true;
+        break;
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < items.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawTailunCompare(
+    ctx,
+    pairs,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    itemGap,
+    leadBodyGap,
+    fonts,
+    colors
+  ) {
+    var y = startY;
+    var truncated = false;
+
+    for (var i = 0; i < pairs.length; i += 1) {
+      var pair = pairs[i];
+      var normal = sanitizeText(pair.normal);
+      var better = sanitizeText(pair.better);
+
+      if (normal) {
+        var normalBlock = drawTailunLeadBodyBlock(
+          ctx,
+          "普通：",
+          normal,
+          x,
+          y,
+          width,
+          maxY,
+          lineHeight,
+          leadBodyGap,
+          fonts,
+          colors
+        );
+        y = normalBlock.nextY;
+        if (normalBlock.truncated) {
+          truncated = true;
+          break;
+        }
+      }
+
+      if (better) {
+        var betterBlock = drawTailunLeadBodyBlock(
+          ctx,
+          "优化：",
+          better,
+          x,
+          y,
+          width,
+          maxY,
+          lineHeight,
+          leadBodyGap,
+          fonts,
+          colors
+        );
+        y = betterBlock.nextY;
+        if (betterBlock.truncated) {
+          truncated = true;
+          break;
+        }
+      }
+
+      y += itemGap;
+      if (y > maxY) {
+        truncated = i < pairs.length - 1;
+        break;
+      }
+    }
+
+    return { truncated: truncated };
+  }
+
+  function drawTailunAutoText(ctx, text, x, startY, width, maxY, lineHeight, fonts, colors) {
+    ctx.fillStyle = colors.textPrimary || "#231A2A";
+    ctx.font = fonts.regular;
+    var lines = splitTextByWidth(ctx, sanitizeText(text), width);
+    var rows = drawLinesWithMaxY(ctx, lines, x, startY, lineHeight, maxY);
+    return { truncated: rows.truncated };
+  }
+
+  function drawTailunLeadBodyBlock(
+    ctx,
+    lead,
+    body,
+    x,
+    startY,
+    width,
+    maxY,
+    lineHeight,
+    leadBodyGap,
+    fonts,
+    colors
+  ) {
+    var leadText = sanitizeText(lead);
+    var bodyText = sanitizeText(body);
+
+    if (!leadText && !bodyText) {
+      return {
+        nextY: startY,
+        truncated: false
+      };
+    }
+
+    if (!leadText) {
+      ctx.fillStyle = colors.textPrimary || "#231A2A";
+      ctx.font = fonts.regular;
+      return drawLinesWithMaxY(ctx, splitTextByWidth(ctx, bodyText, width), x, startY, lineHeight, maxY);
+    }
+
+    if (!bodyText) {
+      ctx.fillStyle = colors.textAccent || colors.textPrimary || "#B24F67";
+      ctx.font = fonts.lead;
+      return drawLinesWithMaxY(ctx, splitTextByWidth(ctx, leadText, width), x, startY, lineHeight, maxY);
+    }
+
+    if (startY > maxY) {
+      return {
+        nextY: startY,
+        truncated: true
+      };
+    }
+
+    ctx.fillStyle = colors.textAccent || colors.textPrimary || "#B24F67";
+    ctx.font = fonts.lead;
+    var leadWidth = ctx.measureText(leadText).width;
+    var firstBodyWidth = Math.max(80, width - leadWidth - leadBodyGap);
+
+    if (leadWidth > width * 0.62) {
+      var leadRows = drawLinesWithMaxY(ctx, splitTextByWidth(ctx, leadText, width), x, startY, lineHeight, maxY);
+      if (leadRows.truncated) {
+        return {
+          nextY: leadRows.nextY,
+          truncated: true
+        };
+      }
+      ctx.fillStyle = colors.textPrimary || "#231A2A";
+      ctx.font = fonts.regular;
+      return drawLinesWithMaxY(
+        ctx,
+        splitTextByWidth(ctx, bodyText, width),
+        x,
+        leadRows.nextY + Math.max(2, Math.floor(leadBodyGap / 2)),
+        lineHeight,
+        maxY
+      );
+    }
+
+    ctx.font = fonts.regular;
+    var firstBodyLine = takeLineByWidth(ctx, bodyText, firstBodyWidth);
+    var restBody = sanitizeText(bodyText.slice(firstBodyLine.length));
+
+    ctx.fillStyle = colors.textAccent || colors.textPrimary || "#B24F67";
+    ctx.font = fonts.lead;
+    ctx.fillText(leadText, x, startY);
+
+    ctx.fillStyle = colors.textPrimary || "#231A2A";
+    ctx.font = fonts.regular;
+    if (firstBodyLine) {
+      ctx.fillText(firstBodyLine, x + leadWidth + leadBodyGap, startY);
+    }
+
+    var nextY = startY + lineHeight;
+    if (!restBody) {
+      return {
+        nextY: nextY,
+        truncated: false
+      };
+    }
+
+    var rows = drawLinesWithMaxY(ctx, splitTextByWidth(ctx, restBody, width), x, nextY, lineHeight, maxY);
+    return {
+      nextY: rows.nextY,
+      truncated: rows.truncated
+    };
   }
 
   function drawRifuPage(ctx, group, page, finalType, warnings) {
@@ -5185,6 +6306,67 @@
       body: sanitizeText(match[2])
     };
   }
+
+  function formatXiaoxingLabCoverHeaderText(input, fallbackText) {
+    var fallback = sanitizeText(fallbackText || "小/说/素/材/分/享");
+    var raw = sanitizeText(input);
+    if (!raw) {
+      return fallback;
+    }
+    if (raw.indexOf("/") >= 0) {
+      return raw.replace(/\s+/g, "");
+    }
+
+    var normalized = raw.replace(/[，,、|｜\s]+/g, "");
+    if (!normalized) {
+      return fallback;
+    }
+    if (normalized.indexOf("小说素材") >= 0) {
+      return fallback;
+    }
+    if (normalized.length >= 2 && normalized.length <= 10) {
+      return normalized.split("").join("/");
+    }
+
+    return fallback;
+  }
+
+  function splitTailunLeadBody(text) {
+    var raw = sanitizeText(text);
+    if (!raw) {
+      return { lead: "", body: "" };
+    }
+
+    var lines = raw.split(/\n+/).map(sanitizeText).filter(Boolean);
+    if (lines.length > 1) {
+      return {
+        lead: lines[0],
+        body: lines.slice(1).join(" ")
+      };
+    }
+
+    var dashMatch = raw.match(/^(.*?)(?:——|—|-)\s*(.+)$/);
+    if (dashMatch && sanitizeText(dashMatch[1]).length <= 36) {
+      return {
+        lead: sanitizeText(dashMatch[1]),
+        body: sanitizeText(dashMatch[2])
+      };
+    }
+
+    var colonMatch = raw.match(/^(.*?[：:])\s*(.+)$/);
+    if (colonMatch && sanitizeText(colonMatch[1]).length <= 30) {
+      return {
+        lead: sanitizeText(colonMatch[1]),
+        body: sanitizeText(colonMatch[2])
+      };
+    }
+
+    return {
+      lead: "",
+      body: raw
+    };
+  }
+
   function ensureQuotedTitle(title) {
     var raw = sanitizeText(title);
     if (!raw) {

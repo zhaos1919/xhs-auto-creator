@@ -1,0 +1,16 @@
+﻿{
+  "style": "xibo",
+  "cover_top_text": "写小说可用的",
+  "cover_title": "双生名字",
+  "cover_subtitle": "小说素材、干货分享",
+  "pages": [
+    {
+      "type": "list",
+      "title": "内页",
+      "items": [
+        "1. 示例内容一：用于封面位置校验。",
+        "2. 示例内容二：用于导出流程校验。"
+      ]
+    }
+  ]
+}
