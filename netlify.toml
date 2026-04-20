@@ -1,2 +1,8 @@
 [functions]
   directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/doubao/*"
+  to = "https://ark.cn-beijing.volces.com/api/v3/:splat"
+  status = 200
+  force = true

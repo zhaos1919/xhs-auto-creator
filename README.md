@@ -38,9 +38,10 @@ cmd /c npm run xhs:web
 
 部署到 Netlify 后：
 
-- 页面会优先调用 `/.netlify/functions/doubao-chat` 代理，再由服务端转发到豆包接口，避免浏览器跨域拦截。
+- 页面会优先调用站内代理路径 `/api/doubao/chat/completions`（Netlify redirect 到方舟接口）并使用流式返回，减少 `504 Inactivity Timeout`。
+- 若站内代理不可用，会自动回退到 `/.netlify/functions/doubao-chat`。
 - 本地 `file://` 打开时仍使用浏览器直连模式。
-- 修改后需要重新部署站点，确保 `netlify/functions/doubao-chat.js` 一并上线。
+- 修改后需要重新部署站点，确保 `netlify.toml` 和 `netlify/functions/doubao-chat.js` 一并上线。
 
 批量生成：
 

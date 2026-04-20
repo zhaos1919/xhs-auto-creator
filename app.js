@@ -6,6 +6,7 @@
   var CANVAS_HEIGHT = 1440;
   var PAGE_TYPES = Object.freeze(["auto", "list", "tag", "compare"]);
   var DOUBAO_DEFAULT_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3";
+  var DOUBAO_PROXY_API_PATH = "/api/doubao/chat/completions";
   var DOUBAO_PROXY_FUNCTION_PATH = "/.netlify/functions/doubao-chat";
   var DOUBAO_DEFAULT_LAYOUT_STYLE = "xiaoxing_lab";
   var DOUBAO_PAGE_COUNT_MIN = 4;
@@ -1759,8 +1760,24 @@
 
   async function requestDoubaoJson(options) {
     if (shouldUseDoubaoProxy()) {
+      if (shouldUseDoubaoReverseProxy(options.baseUrl)) {
+        try {
+          return await requestDoubaoJsonByReverseProxy(options);
+        } catch (error) {
+          var reverseStatus = Number(error && error.httpStatus);
+          if (
+            reverseStatus !== 404 &&
+            reverseStatus !== 405 &&
+            reverseStatus !== 502 &&
+            reverseStatus !== 504
+          ) {
+            throw error;
+          }
+        }
+      }
+
       try {
-        return await requestDoubaoJsonByProxy(options);
+        return await requestDoubaoJsonByFunctionProxy(options);
       } catch (error) {
         var status = Number(error && error.httpStatus);
         if (status === 404 || status === 405) {
@@ -1773,7 +1790,53 @@
     return requestDoubaoJsonDirect(options);
   }
 
-  async function requestDoubaoJsonByProxy(options) {
+  async function requestDoubaoJsonByReverseProxy(options) {
+    var response;
+    try {
+      response = await fetch(DOUBAO_PROXY_API_PATH, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + options.apiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: options.model,
+          messages: [
+            {
+              role: "system",
+              content: DOUBAO_SYSTEM_PROMPT
+            },
+            {
+              role: "user",
+              content: buildDoubaoUserPrompt(
+                options.topic,
+                options.styleLabel,
+                options.pageCount,
+                options.layoutStyle
+              )
+            }
+          ],
+          temperature: options.temperature,
+          stream: true
+        })
+      });
+    } catch (error) {
+      throw new Error("代理请求失败（网络异常）：" + toErrorMessage(error) + "。");
+    }
+
+    if (!response.ok) {
+      var errorText = await response.text();
+      var reverseError = new Error(
+        "代理请求失败（HTTP " + response.status + "）： " + extractApiErrorMessage(errorText)
+      );
+      reverseError.httpStatus = response.status;
+      throw reverseError;
+    }
+
+    return parseDoubaoCompletionStreamResponse(response);
+  }
+
+  async function requestDoubaoJsonByFunctionProxy(options) {
     var response;
     try {
       response = await fetch(DOUBAO_PROXY_FUNCTION_PATH, {
@@ -1860,7 +1923,7 @@
       throw new Error(
         "请求豆包失败（网络/CORS）：" +
           toErrorMessage(error) +
-          "。线上页面请使用 Netlify Function 代理。"
+          "。线上页面请优先使用 Netlify 站点代理。"
       );
     }
 
@@ -1875,6 +1938,86 @@
     }
 
     return parseDoubaoCompletionResponse(responseText);
+  }
+
+  async function parseDoubaoCompletionStreamResponse(response) {
+    if (!response || !response.body || typeof response.body.getReader !== "function") {
+      var nonStreamText = await response.text();
+      return parseDoubaoCompletionResponse(nonStreamText);
+    }
+
+    var reader = response.body.getReader();
+    var decoder = new TextDecoder("utf-8");
+    var buffer = "";
+    var fragments = [];
+    var finalContent = "";
+
+    while (true) {
+      var result = await reader.read();
+      if (result.done) {
+        break;
+      }
+
+      buffer += decoder.decode(result.value, { stream: true });
+      var newlineIndex = buffer.indexOf("\n");
+      while (newlineIndex >= 0) {
+        var line = buffer.slice(0, newlineIndex);
+        buffer = buffer.slice(newlineIndex + 1);
+        processDoubaoSseLine(line, fragments, function (value) {
+          finalContent = value;
+        });
+        newlineIndex = buffer.indexOf("\n");
+      }
+    }
+
+    buffer += decoder.decode();
+    if (buffer) {
+      processDoubaoSseLine(buffer, fragments, function (value) {
+        finalContent = value;
+      });
+    }
+
+    var outputText = sanitizeText(finalContent || fragments.join(""));
+    if (!outputText) {
+      throw new Error("流式返回为空，未获取到可解析内容。");
+    }
+
+    return parseGeneratedJsonText(outputText);
+  }
+
+  function processDoubaoSseLine(rawLine, fragments, onFinalContent) {
+    var line = String(rawLine || "").trim();
+    if (!line || line.indexOf("data:") !== 0) {
+      return;
+    }
+
+    var payloadText = sanitizeText(line.slice(5));
+    if (!payloadText || payloadText === "[DONE]") {
+      return;
+    }
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadText);
+    } catch (error) {
+      return;
+    }
+
+    var choices = payload && Array.isArray(payload.choices) ? payload.choices : [];
+    var firstChoice = choices[0];
+    if (!firstChoice) {
+      return;
+    }
+
+    var delta = firstChoice.delta;
+    if (delta && typeof delta.content === "string") {
+      fragments.push(delta.content);
+    }
+
+    var message = firstChoice.message;
+    if (message && typeof message.content === "string") {
+      onFinalContent(message.content);
+    }
   }
 
   function parseDoubaoCompletionResponse(responseText) {
@@ -1941,6 +2084,10 @@
     }
 
     return true;
+  }
+
+  function shouldUseDoubaoReverseProxy(baseUrl) {
+    return normalizeBaseUrl(baseUrl) === normalizeBaseUrl(DOUBAO_DEFAULT_BASE_URL);
   }
 
   function buildDoubaoUserPrompt(topic, styleLabel, pageCount, layoutStyle) {
