@@ -6,6 +6,7 @@
   var CANVAS_HEIGHT = 1440;
   var PAGE_TYPES = Object.freeze(["auto", "list", "tag", "compare"]);
   var DOUBAO_DEFAULT_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3";
+  var DOUBAO_PROXY_FUNCTION_PATH = "/.netlify/functions/doubao-chat";
   var DOUBAO_DEFAULT_LAYOUT_STYLE = "xiaoxing_lab";
   var DOUBAO_PAGE_COUNT_MIN = 4;
   var DOUBAO_PAGE_COUNT_MAX = 8;
@@ -1757,33 +1758,111 @@
   }
 
   async function requestDoubaoJson(options) {
+    if (shouldUseDoubaoProxy()) {
+      try {
+        return await requestDoubaoJsonByProxy(options);
+      } catch (error) {
+        var status = Number(error && error.httpStatus);
+        if (status === 404 || status === 405) {
+          return requestDoubaoJsonDirect(options);
+        }
+        throw error;
+      }
+    }
+
+    return requestDoubaoJsonDirect(options);
+  }
+
+  async function requestDoubaoJsonByProxy(options) {
+    var response;
+    try {
+      response = await fetch(DOUBAO_PROXY_FUNCTION_PATH, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          apiKey: options.apiKey,
+          baseUrl: options.baseUrl,
+          model: options.model,
+          messages: [
+            {
+              role: "system",
+              content: DOUBAO_SYSTEM_PROMPT
+            },
+            {
+              role: "user",
+              content: buildDoubaoUserPrompt(
+                options.topic,
+                options.styleLabel,
+                options.pageCount,
+                options.layoutStyle
+              )
+            }
+          ],
+          temperature: options.temperature
+        })
+      });
+    } catch (error) {
+      throw new Error(
+        "代理请求失败（网络异常）：" +
+          toErrorMessage(error) +
+          "。请检查站点是否已部署 Netlify Function。"
+      );
+    }
+
+    var responseText = await response.text();
+    if (!response.ok) {
+      var proxyError = new Error(
+        "代理请求失败（HTTP " +
+          response.status +
+          "）： " +
+          extractApiErrorMessage(responseText)
+      );
+      proxyError.httpStatus = response.status;
+      throw proxyError;
+    }
+
+    return parseDoubaoCompletionResponse(responseText);
+  }
+
+  async function requestDoubaoJsonDirect(options) {
     var endpoint = normalizeBaseUrl(options.baseUrl) + "/chat/completions";
-    var response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + options.apiKey,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: options.model,
-        messages: [
-          {
-            role: "system",
-            content: DOUBAO_SYSTEM_PROMPT
-          },
-          {
-            role: "user",
-            content: buildDoubaoUserPrompt(
-              options.topic,
-              options.styleLabel,
-              options.pageCount,
-              options.layoutStyle
-            )
-          }
-        ],
-        temperature: options.temperature
-      })
-    });
+    var response;
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + options.apiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: options.model,
+          messages: [
+            {
+              role: "system",
+              content: DOUBAO_SYSTEM_PROMPT
+            },
+            {
+              role: "user",
+              content: buildDoubaoUserPrompt(
+                options.topic,
+                options.styleLabel,
+                options.pageCount,
+                options.layoutStyle
+              )
+            }
+          ],
+          temperature: options.temperature
+        })
+      });
+    } catch (error) {
+      throw new Error(
+        "请求豆包失败（网络/CORS）：" +
+          toErrorMessage(error) +
+          "。线上页面请使用 Netlify Function 代理。"
+      );
+    }
 
     var responseText = await response.text();
     if (!response.ok) {
@@ -1791,10 +1870,14 @@
         "请求失败（HTTP " +
           response.status +
           "）： " +
-          summarizeErrorText(responseText)
+          extractApiErrorMessage(responseText)
       );
     }
 
+    return parseDoubaoCompletionResponse(responseText);
+  }
+
+  function parseDoubaoCompletionResponse(responseText) {
     var responseData;
     try {
       responseData = JSON.parse(responseText);
@@ -1812,6 +1895,52 @@
     }
 
     return parseGeneratedJsonText(modelContent);
+  }
+
+  function extractApiErrorMessage(responseText) {
+    var rawText = String(responseText || "").trim();
+    if (!rawText) {
+      return "无详细信息。";
+    }
+
+    try {
+      var parsed = JSON.parse(rawText);
+      if (parsed && typeof parsed.error === "string") {
+        return summarizeErrorText(parsed.error);
+      }
+      if (parsed && parsed.error && typeof parsed.error.message === "string") {
+        return summarizeErrorText(parsed.error.message);
+      }
+      if (parsed && typeof parsed.message === "string") {
+        return summarizeErrorText(parsed.message);
+      }
+    } catch (error) {
+      return summarizeErrorText(rawText);
+    }
+
+    return summarizeErrorText(rawText);
+  }
+
+  function shouldUseDoubaoProxy() {
+    if (typeof window === "undefined" || !window.location) {
+      return false;
+    }
+
+    var protocol = String(window.location.protocol || "").toLowerCase();
+    if (protocol !== "http:" && protocol !== "https:") {
+      return false;
+    }
+
+    var hostname = String(window.location.hostname || "").toLowerCase();
+    if (!hostname) {
+      return false;
+    }
+
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]") {
+      return false;
+    }
+
+    return true;
   }
 
   function buildDoubaoUserPrompt(topic, styleLabel, pageCount, layoutStyle) {
