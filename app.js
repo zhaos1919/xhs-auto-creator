@@ -1106,9 +1106,9 @@
         page: {
           showTitle: false,
           bodyX: 38,
-          bodyY: 68,
+          bodyY: 140,
           bodyWidth: 894,
-          bodyMaxY: 1265,
+          bodyMaxY: 1337,
           itemLineHeight: 72,
           itemGap: 60,
           leadBodyGap: 10
