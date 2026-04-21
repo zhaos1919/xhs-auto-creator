@@ -36,6 +36,12 @@ cmd /c npm run xhs:web
 4. 输入主题，点击 `根据主题生成 JSON（豆包）`。
 5. 生成成功后，JSON 会自动写入原有输入框，直接点击 `开始渲染` 即可出图。
 
+提示词模板维护：
+
+- 项目根目录新增 `prompt-template.txt`，用于集中维护豆包生成 JSON 的 user prompt。
+- 站点在 `http/https` 环境下会优先读取该文件作为运行时模板。
+- `file://` 直开时会自动回退到 `app.js` 内置模板（避免本地浏览器安全限制导致读取失败）。
+
 部署到 Netlify 后：
 
 - 页面会优先调用站内代理路径 `/api/doubao/chat/completions`（Netlify redirect 到方舟接口）并使用流式返回，减少 `504 Inactivity Timeout`。

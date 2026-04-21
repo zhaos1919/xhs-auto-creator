@@ -75,7 +75,22 @@
 
         <div class="actions">
           <button id="doubaoGenerateBtn" type="button" class="btn btn-secondary">根据主题生成 JSON（豆包）</button>
+          <button id="doubaoGenerateTitleBtn" type="button" class="btn btn-secondary">根据主题生成标题（豆包）</button>
         </div>
+
+        <section class="title-box">
+          <div class="title-box-head">
+            <h4 class="module-title">标题生成结果</h4>
+            <button id="doubaoCopyAllTitlesBtn" type="button" class="btn btn-ghost" disabled>复制全部标题</button>
+          </div>
+          <div id="doubaoTitleResultList" class="title-result-list">
+            <p class="title-placeholder">等待生成标题</p>
+          </div>
+          <details id="doubaoTitleDebug" class="title-debug">
+            <summary>调试信息</summary>
+            <pre id="doubaoTitleDebugOutput">暂无调试输出</pre>
+          </details>
+        </section>
       </section>
 
       <div class="field">

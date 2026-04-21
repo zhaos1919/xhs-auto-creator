@@ -8,6 +8,7 @@
   var DOUBAO_DEFAULT_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3";
   var DOUBAO_PROXY_API_PATH = "/api/doubao/chat/completions";
   var DOUBAO_PROXY_FUNCTION_PATH = "/.netlify/functions/doubao-chat";
+  var DOUBAO_PROMPT_TEMPLATE_PATH = "prompt-template.txt";
   var DOUBAO_DEFAULT_LAYOUT_STYLE = "xiaoxing_lab";
   var DOUBAO_PAGE_COUNT_MIN = 4;
   var DOUBAO_PAGE_COUNT_MAX = 8;
@@ -25,6 +26,33 @@
     "你只能输出合法 JSON，不得输出解释。"
   ].join("\n");
   var DOUBAO_GENERATE_BUTTON_TEXT = "根据主题生成 JSON（豆包）";
+  var DOUBAO_TITLE_GENERATE_BUTTON_TEXT = "根据主题生成标题（豆包）";
+  var DOUBAO_TITLE_SYSTEM_PROMPT = [
+    "你是小红书中文标题生成助手，擅长小说素材、写作干货、灵感整理类标题。",
+    "你只输出合法 JSON，不要解释，不要 Markdown 代码块。"
+  ].join("\n");
+  var DOUBAO_TITLE_USER_PROMPT_TEMPLATE = `请根据给定主题生成小红书标题，严格遵守以下规则：
+
+1. 每个主题输出 5 个标题。
+2. 标题符合小红书语境，有网感和活人感，避免营销腔和夸张广告感。
+3. 适合“小说素材 / 写作干货 / 灵感整理”类笔记，强调点开、收藏、点赞、关注欲望。
+4. 标题控制在约 12-22 个汉字，可自然浮动。
+5. 尽量避免低质营销词，如“速看”“绝了”“封神了”“错过血亏”等。
+6. 输出仅包含标题，不要解释。
+7. 必须保留输入主题原文，不要改写主题文本。
+
+请严格返回以下 JSON 结构，不要输出任何其他内容：
+{
+  "items": [
+    {
+      "topic": "主题原文",
+      "titles": ["标题1", "标题2", "标题3", "标题4", "标题5"]
+    }
+  ]
+}
+
+输入主题列表（JSON 数组）：
+{topics_json}`;
   var DOUBAO_USER_PROMPT_TEMPLATE = `请按下面要求，生成一份可直接用于「小红书图文排版工具」的 JSON。
 
 只输出合法 JSON，不要解释，不要 Markdown 代码块，不要额外说明。
@@ -679,6 +707,11 @@
 目标感觉：
 让用户看到后有收藏、点赞、转发欲望，觉得内容密、信息足、句句能直接用于写作；
 同时整体气质要贴合我账号一贯的小红书风格：文学感、治愈感、克制、柔和、安静、高级留白。`;
+  var doubaoUserPromptTemplate = DOUBAO_USER_PROMPT_TEMPLATE;
+  var titleGenerationState = {
+    successItems: [],
+    failureItems: []
+  };
   var STYLE_LABEL_TO_SLUG = Object.freeze({
     "古风": "guofeng",
     "现言": "xianyan",
@@ -1169,6 +1202,11 @@
     doubaoPageCount: document.getElementById("doubaoPageCount"),
     doubaoLayoutStyle: document.getElementById("doubaoLayoutStyle"),
     doubaoGenerateBtn: document.getElementById("doubaoGenerateBtn"),
+    doubaoGenerateTitleBtn: document.getElementById("doubaoGenerateTitleBtn"),
+    doubaoCopyAllTitlesBtn: document.getElementById("doubaoCopyAllTitlesBtn"),
+    doubaoTitleResultList: document.getElementById("doubaoTitleResultList"),
+    doubaoTitleDebug: document.getElementById("doubaoTitleDebug"),
+    doubaoTitleDebugOutput: document.getElementById("doubaoTitleDebugOutput"),
     fillSampleBtn: document.getElementById("fillSampleBtn"),
     clearBtn: document.getElementById("clearBtn"),
     renderBtn: document.getElementById("renderBtn"),
@@ -1180,7 +1218,9 @@
   };
 
   hydrateDoubaoConfig();
+  hydrateExternalDoubaoPromptTemplate();
   bindEvents();
+  resetTitleGenerationPanel();
   maybeAutorunFromQuery();
 
   function bindEvents() {
@@ -1188,6 +1228,12 @@
     refs.clearBtn.addEventListener("click", clearAll);
     refs.renderBtn.addEventListener("click", onRenderClick);
     refs.doubaoGenerateBtn.addEventListener("click", onDoubaoGenerateClick);
+    if (refs.doubaoGenerateTitleBtn) {
+      refs.doubaoGenerateTitleBtn.addEventListener("click", onDoubaoGenerateTitleClick);
+    }
+    if (refs.doubaoCopyAllTitlesBtn) {
+      refs.doubaoCopyAllTitlesBtn.addEventListener("click", onCopyAllTitlesClick);
+    }
     bindStorageOnInput(refs.doubaoApiKey, STORAGE_KEYS.doubaoApiKey);
     bindStorageOnInput(refs.doubaoBaseUrl, STORAGE_KEYS.doubaoBaseUrl);
     bindStorageOnInput(refs.doubaoModel, STORAGE_KEYS.doubaoModel);
@@ -1314,6 +1360,7 @@
     refs.jsonFolder.value = "";
     refs.resultList.innerHTML = "";
     refs.resultCount.textContent = "0 组";
+    resetTitleGenerationPanel();
     clearMessages();
     setStatus("已清空输入与结果。");
   }
@@ -1676,6 +1723,367 @@
     }
   }
 
+  async function onDoubaoGenerateTitleClick() {
+    clearMessages();
+    clearTitleDebugContent();
+
+    var apiKey = sanitizeText(refs.doubaoApiKey.value);
+    var baseUrlInput = sanitizeText(refs.doubaoBaseUrl.value);
+    var baseUrl = baseUrlInput || DOUBAO_DEFAULT_BASE_URL;
+    var model = sanitizeText(refs.doubaoModel.value);
+    var topicInput = String(refs.doubaoTopic.value || "");
+    var topics = parseTopicBatchInput(topicInput);
+
+    var missing = [];
+    if (!apiKey) {
+      missing.push("豆包 API Key");
+    }
+    if (!baseUrlInput) {
+      missing.push("豆包 Base URL");
+    }
+    if (!model) {
+      missing.push("豆包 模型/接入点ID");
+    }
+    if (topics.length === 0) {
+      missing.push("主题");
+    }
+
+    if (missing.length > 0) {
+      showErrors(["请先填写：" + missing.join("、") + "。"]);
+      setStatus("标题生成失败：存在必填项缺失。");
+      return;
+    }
+
+    refs.doubaoBaseUrl.value = baseUrl;
+    writeStorage(STORAGE_KEYS.doubaoApiKey, apiKey);
+    writeStorage(STORAGE_KEYS.doubaoBaseUrl, baseUrl);
+    writeStorage(STORAGE_KEYS.doubaoModel, model);
+
+    var originalBtnText =
+      refs.doubaoGenerateTitleBtn.textContent || DOUBAO_TITLE_GENERATE_BUTTON_TEXT;
+    refs.doubaoGenerateTitleBtn.disabled = true;
+    refs.doubaoGenerateTitleBtn.textContent = "批量生成标题中...";
+    renderTitlePlaceholder("正在批量生成标题...");
+    setStatus("正在批量生成标题...");
+
+    try {
+      var generationResult = await generateTitleByBatchWithFallback({
+        apiKey: apiKey,
+        baseUrl: baseUrl,
+        model: model,
+        topics: topics,
+        temperature: 0.9,
+        onFallbackProgress: function (current, total) {
+          refs.doubaoGenerateTitleBtn.textContent = "逐条补救中（" + current + "/" + total + "）...";
+          setStatus("正在生成第 " + current + "/" + total + " 个主题标题...");
+        }
+      });
+
+      renderTitleGenerationResults(generationResult.successItems, generationResult.failureItems);
+
+      var warningItems = generationResult.warnings.slice();
+      if (generationResult.failureItems.length > 0) {
+        warningItems.push(
+          "标题生成完成：成功 " +
+            generationResult.successItems.length +
+            " 组，失败 " +
+            generationResult.failureItems.length +
+            " 组。"
+        );
+        warningItems = warningItems.concat(
+          generationResult.failureItems.map(function (item) {
+            return "第 " + item.index + " 组「" + item.topic + "」失败：" + item.message;
+          })
+        );
+      }
+      if (warningItems.length > 0) {
+        showWarnings(warningItems);
+      }
+
+      if (generationResult.successItems.length === 0) {
+        showErrors(["标题生成失败：未生成可用标题。"]);
+        setStatus(
+          "标题生成失败：成功 0 组，失败 " + generationResult.failureItems.length + " 组。"
+        );
+        return;
+      }
+
+      if (generationResult.failureItems.length > 0) {
+        setStatus(
+          "标题批量生成完成：成功 " +
+            generationResult.successItems.length +
+            " 组，失败 " +
+            generationResult.failureItems.length +
+            " 组。"
+        );
+      } else {
+        setStatus("标题生成成功：共 " + generationResult.successItems.length + " 组。");
+      }
+    } catch (error) {
+      if (sanitizeText(error && error.rawContent)) {
+        setTitleDebugContent(error.rawContent);
+      }
+      showErrors(["标题生成失败：" + toErrorMessage(error)]);
+      setStatus("标题生成失败。");
+      renderTitlePlaceholder("等待生成标题");
+    } finally {
+      refs.doubaoGenerateTitleBtn.disabled = false;
+      refs.doubaoGenerateTitleBtn.textContent = originalBtnText;
+    }
+  }
+
+  async function generateTitleByBatchWithFallback(options) {
+    var topicEntries = options.topics.map(function (topic, idx) {
+      return {
+        index: idx + 1,
+        topic: topic
+      };
+    });
+    var warnings = [];
+    var successItems = [];
+    var retryEntries = topicEntries.slice();
+
+    try {
+      var batchResult = await requestDoubaoTitleBatch({
+        apiKey: options.apiKey,
+        baseUrl: options.baseUrl,
+        model: options.model,
+        topics: options.topics,
+        temperature: options.temperature
+      });
+      var normalizedBatch = normalizeTitleGenerationPayload(batchResult.payload, options.topics);
+      successItems = normalizedBatch.successItems.slice();
+      warnings = warnings.concat(normalizedBatch.warnings);
+      retryEntries = normalizedBatch.failureItems.map(function (item) {
+        return {
+          index: item.index,
+          topic: item.topic
+        };
+      });
+    } catch (error) {
+      if (sanitizeText(error && error.rawContent)) {
+        setTitleDebugContent(error.rawContent);
+      }
+      warnings.push("批量请求失败，已自动降级为逐条生成：" + toErrorMessage(error));
+      retryEntries = topicEntries.slice();
+    }
+
+    var failureItems = [];
+    if (retryEntries.length > 0) {
+      for (var i = 0; i < retryEntries.length; i += 1) {
+        var entry = retryEntries[i];
+        if (typeof options.onFallbackProgress === "function") {
+          options.onFallbackProgress(i + 1, retryEntries.length, entry.topic);
+        }
+
+        try {
+          var singleResult = await requestDoubaoTitleBatch({
+            apiKey: options.apiKey,
+            baseUrl: options.baseUrl,
+            model: options.model,
+            topics: [entry.topic],
+            temperature: options.temperature
+          });
+          var normalizedSingle = normalizeTitleGenerationPayload(singleResult.payload, [entry.topic]);
+          if (normalizedSingle.successItems.length === 0) {
+            throw new Error(
+              normalizedSingle.failureItems.length > 0
+                ? normalizedSingle.failureItems[0].message
+                : "逐条请求未返回可用标题。"
+            );
+          }
+
+          successItems.push({
+            index: entry.index,
+            topic: entry.topic,
+            titles: normalizedSingle.successItems[0].titles
+          });
+        } catch (error) {
+          if (sanitizeText(error && error.rawContent)) {
+            setTitleDebugContent(error.rawContent);
+          }
+          failureItems.push({
+            index: entry.index,
+            topic: entry.topic,
+            message: toErrorMessage(error)
+          });
+        }
+      }
+    }
+
+    successItems.sort(function (a, b) {
+      return a.index - b.index;
+    });
+    failureItems.sort(function (a, b) {
+      return a.index - b.index;
+    });
+
+    return {
+      successItems: successItems,
+      failureItems: failureItems,
+      warnings: warnings
+    };
+  }
+
+  async function requestDoubaoTitleBatch(options) {
+    var responseContent = await requestDoubaoCompletionText({
+      apiKey: options.apiKey,
+      baseUrl: options.baseUrl,
+      model: options.model,
+      messages: buildDoubaoTitleMessages(options.topics),
+      temperature: options.temperature
+    });
+
+    try {
+      return {
+        payload: parseGeneratedJsonText(responseContent),
+        rawContent: responseContent
+      };
+    } catch (error) {
+      var parseError = new Error("标题结果解析失败：" + toErrorMessage(error));
+      parseError.rawContent = responseContent;
+      throw parseError;
+    }
+  }
+
+  function buildDoubaoTitleMessages(topics) {
+    return [
+      {
+        role: "system",
+        content: DOUBAO_TITLE_SYSTEM_PROMPT
+      },
+      {
+        role: "user",
+        content: buildDoubaoTitleUserPrompt(topics)
+      }
+    ];
+  }
+
+  function buildDoubaoTitleUserPrompt(topics) {
+    var cleanTopics = Array.isArray(topics)
+      ? topics.map(sanitizeText).filter(Boolean)
+      : [];
+    return DOUBAO_TITLE_USER_PROMPT_TEMPLATE.split("{topics_json}").join(
+      JSON.stringify(cleanTopics, null, 2)
+    );
+  }
+
+  function normalizeTitleGenerationPayload(rawPayload, topics) {
+    if (!rawPayload || typeof rawPayload !== "object" || Array.isArray(rawPayload)) {
+      throw new Error("返回 JSON 顶层必须为对象。");
+    }
+
+    if (!Array.isArray(rawPayload.items)) {
+      throw new Error("返回 JSON 缺少 items 数组。");
+    }
+
+    var rawItems = rawPayload.items;
+    var used = [];
+    var successItems = [];
+    var failureItems = [];
+    var warnings = [];
+
+    for (var i = 0; i < topics.length; i += 1) {
+      var topic = sanitizeText(topics[i]);
+      var entry = pickTitleItemForTopic(rawItems, used, topic, i);
+      if (!entry) {
+        failureItems.push({
+          index: i + 1,
+          topic: topic,
+          message: "返回内容缺少该主题结果。"
+        });
+        continue;
+      }
+
+      var parsedTitles = normalizeTitleList(entry.titles);
+      if (parsedTitles.length < 5) {
+        failureItems.push({
+          index: i + 1,
+          topic: topic,
+          message: "返回标题数量不足 5 条（当前 " + parsedTitles.length + " 条）。"
+        });
+        continue;
+      }
+
+      var returnedTopic = sanitizeText(entry.topic);
+      if (returnedTopic && returnedTopic !== topic) {
+        warnings.push(
+          "主题「" + topic + "」返回 topic 为「" + returnedTopic + "」，已按输入顺序匹配。"
+        );
+      }
+
+      successItems.push({
+        index: i + 1,
+        topic: topic,
+        titles: parsedTitles.slice(0, 5)
+      });
+    }
+
+    return {
+      successItems: successItems,
+      failureItems: failureItems,
+      warnings: warnings
+    };
+  }
+
+  function pickTitleItemForTopic(rawItems, used, topic, preferredIndex) {
+    var safeTopic = sanitizeText(topic);
+
+    for (var i = 0; i < rawItems.length; i += 1) {
+      if (used[i]) {
+        continue;
+      }
+      var item = rawItems[i];
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        continue;
+      }
+      if (sanitizeText(item.topic) === safeTopic) {
+        used[i] = true;
+        return item;
+      }
+    }
+
+    if (preferredIndex >= 0 && preferredIndex < rawItems.length && !used[preferredIndex]) {
+      var preferred = rawItems[preferredIndex];
+      if (preferred && typeof preferred === "object" && !Array.isArray(preferred)) {
+        used[preferredIndex] = true;
+        return preferred;
+      }
+    }
+
+    for (var j = 0; j < rawItems.length; j += 1) {
+      if (used[j]) {
+        continue;
+      }
+      var fallback = rawItems[j];
+      if (!fallback || typeof fallback !== "object" || Array.isArray(fallback)) {
+        continue;
+      }
+      used[j] = true;
+      return fallback;
+    }
+
+    return null;
+  }
+
+  function normalizeTitleList(rawTitles) {
+    var list = Array.isArray(rawTitles) ? rawTitles : [];
+    var normalized = [];
+
+    for (var i = 0; i < list.length; i += 1) {
+      var title = sanitizeText(list[i]);
+      if (!title) {
+        continue;
+      }
+      if (normalized.indexOf(title) >= 0) {
+        continue;
+      }
+      normalized.push(title);
+    }
+
+    return normalized;
+  }
+
   async function handleGenerateFromTopic(options) {
     var parsedInput = parseDoubaoTopicInput(options.rawTopicInput, options.selectedPageCount);
     var selectedLayoutStyle = normalizeDoubaoLayoutStyle(options.selectedLayoutStyle);
@@ -1759,10 +2167,15 @@
   }
 
   async function requestDoubaoJson(options) {
+    var responseContent = await requestDoubaoCompletionText(options);
+    return parseGeneratedJsonText(responseContent);
+  }
+
+  async function requestDoubaoCompletionText(options) {
     if (shouldUseDoubaoProxy()) {
       if (shouldUseDoubaoReverseProxy(options.baseUrl)) {
         try {
-          return await requestDoubaoJsonByReverseProxy(options);
+          return await requestDoubaoCompletionByReverseProxy(options);
         } catch (error) {
           var reverseStatus = Number(error && error.httpStatus);
           if (
@@ -1777,20 +2190,20 @@
       }
 
       try {
-        return await requestDoubaoJsonByFunctionProxy(options);
+        return await requestDoubaoCompletionByFunctionProxy(options);
       } catch (error) {
         var status = Number(error && error.httpStatus);
         if (status === 404 || status === 405) {
-          return requestDoubaoJsonDirect(options);
+          return requestDoubaoCompletionDirect(options);
         }
         throw error;
       }
     }
 
-    return requestDoubaoJsonDirect(options);
+    return requestDoubaoCompletionDirect(options);
   }
 
-  async function requestDoubaoJsonByReverseProxy(options) {
+  async function requestDoubaoCompletionByReverseProxy(options) {
     var response;
     try {
       response = await fetch(DOUBAO_PROXY_API_PATH, {
@@ -1801,21 +2214,7 @@
         },
         body: JSON.stringify({
           model: options.model,
-          messages: [
-            {
-              role: "system",
-              content: DOUBAO_SYSTEM_PROMPT
-            },
-            {
-              role: "user",
-              content: buildDoubaoUserPrompt(
-                options.topic,
-                options.styleLabel,
-                options.pageCount,
-                options.layoutStyle
-              )
-            }
-          ],
+          messages: buildDoubaoMessages(options),
           temperature: options.temperature,
           stream: true
         })
@@ -1833,10 +2232,10 @@
       throw reverseError;
     }
 
-    return parseDoubaoCompletionStreamResponse(response);
+    return parseDoubaoCompletionStreamContent(response);
   }
 
-  async function requestDoubaoJsonByFunctionProxy(options) {
+  async function requestDoubaoCompletionByFunctionProxy(options) {
     var response;
     try {
       response = await fetch(DOUBAO_PROXY_FUNCTION_PATH, {
@@ -1848,21 +2247,7 @@
           apiKey: options.apiKey,
           baseUrl: options.baseUrl,
           model: options.model,
-          messages: [
-            {
-              role: "system",
-              content: DOUBAO_SYSTEM_PROMPT
-            },
-            {
-              role: "user",
-              content: buildDoubaoUserPrompt(
-                options.topic,
-                options.styleLabel,
-                options.pageCount,
-                options.layoutStyle
-              )
-            }
-          ],
+          messages: buildDoubaoMessages(options),
           temperature: options.temperature
         })
       });
@@ -1886,10 +2271,10 @@
       throw proxyError;
     }
 
-    return parseDoubaoCompletionResponse(responseText);
+    return extractDoubaoCompletionContent(responseText);
   }
 
-  async function requestDoubaoJsonDirect(options) {
+  async function requestDoubaoCompletionDirect(options) {
     var endpoint = normalizeBaseUrl(options.baseUrl) + "/chat/completions";
     var response;
     try {
@@ -1901,21 +2286,7 @@
         },
         body: JSON.stringify({
           model: options.model,
-          messages: [
-            {
-              role: "system",
-              content: DOUBAO_SYSTEM_PROMPT
-            },
-            {
-              role: "user",
-              content: buildDoubaoUserPrompt(
-                options.topic,
-                options.styleLabel,
-                options.pageCount,
-                options.layoutStyle
-              )
-            }
-          ],
+          messages: buildDoubaoMessages(options),
           temperature: options.temperature
         })
       });
@@ -1937,13 +2308,18 @@
       );
     }
 
-    return parseDoubaoCompletionResponse(responseText);
+    return extractDoubaoCompletionContent(responseText);
   }
 
   async function parseDoubaoCompletionStreamResponse(response) {
+    var outputText = await parseDoubaoCompletionStreamContent(response);
+    return parseGeneratedJsonText(outputText);
+  }
+
+  async function parseDoubaoCompletionStreamContent(response) {
     if (!response || !response.body || typeof response.body.getReader !== "function") {
       var nonStreamText = await response.text();
-      return parseDoubaoCompletionResponse(nonStreamText);
+      return extractDoubaoCompletionContent(nonStreamText);
     }
 
     var reader = response.body.getReader();
@@ -1982,7 +2358,7 @@
       throw new Error("流式返回为空，未获取到可解析内容。");
     }
 
-    return parseGeneratedJsonText(outputText);
+    return outputText;
   }
 
   function processDoubaoSseLine(rawLine, fragments, onFinalContent) {
@@ -2021,6 +2397,10 @@
   }
 
   function parseDoubaoCompletionResponse(responseText) {
+    return parseGeneratedJsonText(extractDoubaoCompletionContent(responseText));
+  }
+
+  function extractDoubaoCompletionContent(responseText) {
     var responseData;
     try {
       responseData = JSON.parse(responseText);
@@ -2037,7 +2417,7 @@
       throw new Error("接口返回缺少 choices[0].message.content。");
     }
 
-    return parseGeneratedJsonText(modelContent);
+    return normalizeMessageContent(modelContent);
   }
 
   function extractApiErrorMessage(responseText) {
@@ -2062,6 +2442,42 @@
     }
 
     return summarizeErrorText(rawText);
+  }
+
+  async function hydrateExternalDoubaoPromptTemplate() {
+    if (!shouldLoadExternalDoubaoPromptTemplate()) {
+      return;
+    }
+
+    try {
+      var response = await fetch(DOUBAO_PROMPT_TEMPLATE_PATH, {
+        method: "GET",
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        return;
+      }
+
+      var templateText = String(await response.text() || "")
+        .replace(/^\uFEFF/, "")
+        .trim();
+      if (!templateText) {
+        return;
+      }
+
+      doubaoUserPromptTemplate = templateText;
+    } catch (error) {
+      return;
+    }
+  }
+
+  function shouldLoadExternalDoubaoPromptTemplate() {
+    if (typeof window === "undefined" || !window.location) {
+      return false;
+    }
+
+    var protocol = String(window.location.protocol || "").toLowerCase();
+    return protocol === "http:" || protocol === "https:";
   }
 
   function shouldUseDoubaoProxy() {
@@ -2090,13 +2506,35 @@
     return normalizeBaseUrl(baseUrl) === normalizeBaseUrl(DOUBAO_DEFAULT_BASE_URL);
   }
 
+  function buildDoubaoMessages(options) {
+    if (Array.isArray(options && options.messages) && options.messages.length > 0) {
+      return options.messages;
+    }
+
+    return [
+      {
+        role: "system",
+        content: DOUBAO_SYSTEM_PROMPT
+      },
+      {
+        role: "user",
+        content: buildDoubaoUserPrompt(
+          options.topic,
+          options.styleLabel,
+          options.pageCount,
+          options.layoutStyle
+        )
+      }
+    ];
+  }
+
   function buildDoubaoUserPrompt(topic, styleLabel, pageCount, layoutStyle) {
     var safeTopic = sanitizeText(topic) || "写作素材";
     var safeStyleLabel = sanitizeText(styleLabel) || "通用";
     var safePageCount = normalizeRequestedPageCount(pageCount);
     var safeLayoutStyle = normalizeDoubaoLayoutStyle(layoutStyle);
 
-    return DOUBAO_USER_PROMPT_TEMPLATE.split("{topic}")
+    return doubaoUserPromptTemplate.split("{topic}")
       .join(safeTopic)
       .split("{style_label}")
       .join(safeStyleLabel)
@@ -6802,6 +7240,281 @@
 
     imageCache.set(src, task);
     return task;
+  }
+
+  function resetTitleGenerationPanel() {
+    titleGenerationState.successItems = [];
+    titleGenerationState.failureItems = [];
+    renderTitlePlaceholder("等待生成标题");
+    clearTitleDebugContent();
+  }
+
+  function renderTitlePlaceholder(text) {
+    if (!refs.doubaoTitleResultList) {
+      return;
+    }
+    refs.doubaoTitleResultList.innerHTML =
+      '<p class="title-placeholder">' + sanitizeText(text || "等待生成标题") + "</p>";
+    if (refs.doubaoCopyAllTitlesBtn) {
+      refs.doubaoCopyAllTitlesBtn.disabled = true;
+      refs.doubaoCopyAllTitlesBtn.textContent = "复制全部标题";
+    }
+  }
+
+  function clearTitleDebugContent() {
+    if (!refs.doubaoTitleDebugOutput) {
+      return;
+    }
+    refs.doubaoTitleDebugOutput.textContent = "暂无调试输出";
+    if (refs.doubaoTitleDebug) {
+      refs.doubaoTitleDebug.open = false;
+    }
+  }
+
+  function setTitleDebugContent(rawText) {
+    if (!refs.doubaoTitleDebugOutput) {
+      return;
+    }
+
+    var content = String(rawText || "").trim();
+    if (!content) {
+      return;
+    }
+    refs.doubaoTitleDebugOutput.textContent = content;
+    if (refs.doubaoTitleDebug) {
+      refs.doubaoTitleDebug.open = true;
+    }
+  }
+
+  function renderTitleGenerationResults(successItems, failureItems) {
+    var successList = Array.isArray(successItems) ? successItems.slice() : [];
+    var failureList = Array.isArray(failureItems) ? failureItems.slice() : [];
+
+    successList.sort(function (a, b) {
+      return a.index - b.index;
+    });
+    failureList.sort(function (a, b) {
+      return a.index - b.index;
+    });
+
+    titleGenerationState.successItems = successList;
+    titleGenerationState.failureItems = failureList;
+
+    if (!refs.doubaoTitleResultList) {
+      return;
+    }
+
+    if (successList.length === 0 && failureList.length === 0) {
+      renderTitlePlaceholder("等待生成标题");
+      return;
+    }
+
+    refs.doubaoTitleResultList.innerHTML = "";
+
+    var merged = successList
+      .map(function (item) {
+        return {
+          type: "success",
+          index: item.index,
+          topic: item.topic,
+          titles: item.titles
+        };
+      })
+      .concat(
+        failureList.map(function (item) {
+          return {
+            type: "error",
+            index: item.index,
+            topic: item.topic,
+            message: item.message
+          };
+        })
+      )
+      .sort(function (a, b) {
+        return a.index - b.index;
+      });
+
+    for (var i = 0; i < merged.length; i += 1) {
+      refs.doubaoTitleResultList.appendChild(createTitleResultNode(merged[i]));
+    }
+
+    if (refs.doubaoCopyAllTitlesBtn) {
+      refs.doubaoCopyAllTitlesBtn.disabled = successList.length === 0;
+      refs.doubaoCopyAllTitlesBtn.textContent =
+        successList.length > 0
+          ? "复制全部标题（" + successList.length + "组）"
+          : "复制全部标题";
+    }
+  }
+
+  function createTitleResultNode(entry) {
+    var wrapper = document.createElement("article");
+    wrapper.className =
+      entry.type === "error" ? "title-group title-group-error" : "title-group";
+
+    var header = document.createElement("div");
+    header.className = "title-group-head";
+    var topic = document.createElement("h5");
+    topic.className = "title-group-topic";
+    topic.textContent = "主题 " + entry.index + "：" + (entry.topic || "(空主题)");
+    header.appendChild(topic);
+
+    if (entry.type !== "error") {
+      var copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "btn btn-ghost title-item-copy";
+      copyBtn.textContent = "复制本组标题";
+      copyBtn.addEventListener(
+        "click",
+        (function (groupEntry) {
+          return function () {
+            copyTitleText(
+              buildTitleGroupCopyText(groupEntry),
+              "已复制主题「" + groupEntry.topic + "」的标题。"
+            );
+          };
+        })(entry)
+      );
+      header.appendChild(copyBtn);
+    }
+
+    wrapper.appendChild(header);
+
+    if (entry.type === "error") {
+      var errorText = document.createElement("p");
+      errorText.className = "title-group-error-message";
+      errorText.textContent = entry.message || "生成失败。";
+      wrapper.appendChild(errorText);
+      return wrapper;
+    }
+
+    var list = document.createElement("ol");
+    list.className = "title-items";
+    for (var i = 0; i < entry.titles.length; i += 1) {
+      var title = entry.titles[i];
+      var item = document.createElement("li");
+      item.className = "title-item";
+
+      var text = document.createElement("span");
+      text.className = "title-item-text";
+      text.textContent = title;
+      text.title = "单击复制标题";
+      text.addEventListener(
+        "click",
+        (function (titleText) {
+          return function () {
+            copyTitleText(titleText, "已复制标题。");
+          };
+        })(title)
+      );
+
+      var oneCopyBtn = document.createElement("button");
+      oneCopyBtn.type = "button";
+      oneCopyBtn.className = "btn btn-ghost title-item-copy";
+      oneCopyBtn.textContent = "复制";
+      oneCopyBtn.addEventListener(
+        "click",
+        (function (titleText) {
+          return function () {
+            copyTitleText(titleText, "已复制标题。");
+          };
+        })(title)
+      );
+
+      item.appendChild(text);
+      item.appendChild(oneCopyBtn);
+      list.appendChild(item);
+    }
+
+    wrapper.appendChild(list);
+    return wrapper;
+  }
+
+  function buildTitleGroupCopyText(entry) {
+    var lines = ["【" + (entry.topic || "未命名主题") + "】"];
+    var titles = Array.isArray(entry.titles) ? entry.titles : [];
+    for (var i = 0; i < titles.length; i += 1) {
+      lines.push(String(i + 1) + ". " + titles[i]);
+    }
+    return lines.join("\n");
+  }
+
+  function buildAllTitleCopyText(successItems) {
+    if (!Array.isArray(successItems) || successItems.length === 0) {
+      return "";
+    }
+    return successItems
+      .slice()
+      .sort(function (a, b) {
+        return a.index - b.index;
+      })
+      .map(function (item) {
+        return buildTitleGroupCopyText(item);
+      })
+      .join("\n\n");
+  }
+
+  async function onCopyAllTitlesClick() {
+    if (!titleGenerationState.successItems || titleGenerationState.successItems.length === 0) {
+      setStatus("暂无可复制的标题结果。");
+      return;
+    }
+
+    await copyTitleText(
+      buildAllTitleCopyText(titleGenerationState.successItems),
+      "已复制全部标题。"
+    );
+  }
+
+  async function copyTitleText(text, successStatus) {
+    try {
+      await copyTextToClipboard(text);
+      setStatus(successStatus || "复制成功。");
+    } catch (error) {
+      showErrors(["复制失败：" + toErrorMessage(error)]);
+      setStatus("复制失败。");
+    }
+  }
+
+  async function copyTextToClipboard(text) {
+    var value = String(text || "");
+    if (!value.trim()) {
+      throw new Error("没有可复制内容。");
+    }
+
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return;
+      } catch (error) {
+      }
+    }
+
+    var textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "readonly");
+    textarea.style.position = "fixed";
+    textarea.style.top = "-1000px";
+    textarea.style.left = "-1000px";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    var copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch (error) {
+      copied = false;
+    }
+    textarea.remove();
+
+    if (!copied) {
+      throw new Error("当前环境不支持自动复制，请手动复制。");
+    }
   }
 
   function renderResults(groups) {
