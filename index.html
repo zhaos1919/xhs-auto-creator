@@ -78,6 +78,68 @@
           <button id="doubaoGenerateTitleBtn" type="button" class="btn btn-secondary">根据主题生成标题（豆包）</button>
         </div>
 
+        <details id="taskProgressPanel" class="task-progress-panel">
+          <summary id="taskProgressSummary">生成任务进度（空闲，点击展开）</summary>
+
+          <section class="task-overview-box">
+            <h4 class="module-title">总任务状态</h4>
+            <div class="task-overview-line">
+              <span>当前执行</span>
+              <strong id="taskOverviewCurrent">空闲</strong>
+            </div>
+            <div class="task-overview-line">
+              <span>JSON</span>
+              <span id="taskOverviewJson">未开始</span>
+            </div>
+            <div class="task-overview-line">
+              <span>标题</span>
+              <span id="taskOverviewTitles">未开始</span>
+            </div>
+          </section>
+
+          <section class="progress-box">
+            <div class="progress-head">
+              <h4 class="module-title">JSON 生成进度</h4>
+              <span id="jsonTaskPercent" class="progress-percent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div id="jsonTaskBar" class="progress-fill" style="width:0%"></div>
+            </div>
+            <div class="progress-lines">
+              <p id="jsonTaskStatus">等待开始</p>
+              <p id="jsonTaskTopic">当前主题：-</p>
+              <p class="progress-inline">
+                <span id="jsonTaskCount">进度：0 / 0</span>
+                <span id="jsonTaskStats">成功 0，失败 0</span>
+              </p>
+              <p id="jsonTaskTime">已耗时 0秒 · 平均每个主题 -- · 预计剩余 --</p>
+            </div>
+            <details id="doubaoJsonDebug" class="title-debug">
+              <summary>JSON 调试信息</summary>
+              <pre id="doubaoJsonDebugOutput">暂无调试输出</pre>
+            </details>
+          </section>
+
+          <section class="progress-box">
+            <div class="progress-head">
+              <h4 class="module-title">标题生成进度</h4>
+              <span id="titleTaskPercent" class="progress-percent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div id="titleTaskBar" class="progress-fill" style="width:0%"></div>
+            </div>
+            <div class="progress-lines">
+              <p id="titleTaskStatus">等待开始</p>
+              <p id="titleTaskTopic">当前主题：-</p>
+              <p class="progress-inline">
+                <span id="titleTaskCount">进度：0 / 0</span>
+                <span id="titleTaskStats">成功 0，失败 0</span>
+              </p>
+              <p id="titleTaskTime">已耗时 0秒 · 平均每个主题 -- · 预计剩余 --</p>
+            </div>
+          </section>
+        </details>
+
         <section class="title-box">
           <div class="title-box-head">
             <h4 class="module-title">标题生成结果</h4>

@@ -166,12 +166,149 @@ input[type="file"] {
   margin-top: 18px;
 }
 
+.task-overview-box,
+.progress-box {
+  margin-top: 10px;
+  border: 1px solid rgba(23, 39, 69, 0.12);
+  border-radius: 12px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
 .title-box {
-  margin-top: 14px;
+  margin-top: 12px;
   border: 1px solid rgba(23, 39, 69, 0.12);
   border-radius: 12px;
   padding: 12px;
   background: rgba(255, 255, 255, 0.72);
+}
+
+.task-progress-panel {
+  margin-top: 10px;
+  border: 1px solid rgba(23, 39, 69, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 6px 8px 10px;
+}
+
+.task-progress-panel > summary {
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: #2d3750;
+  font-weight: 600;
+  line-height: 1.4;
+  list-style: none;
+}
+
+.task-progress-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.task-progress-panel > summary::before {
+  content: "▶";
+  display: inline-block;
+  margin-right: 6px;
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+  font-size: 11px;
+}
+
+.task-progress-panel[open] > summary::before {
+  transform: rotate(90deg) translateX(1px);
+}
+
+.task-overview-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 0;
+  font-size: 12px;
+  color: #283144;
+}
+
+.task-overview-line strong {
+  color: #1f2431;
+}
+
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.progress-head .module-title {
+  margin: 0;
+  font-size: 14px;
+}
+
+.progress-percent {
+  font-size: 12px;
+  color: #1f2431;
+  font-weight: 600;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(23, 39, 69, 0.12);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--brand-2), #48bb99);
+  transition: width 0.2s ease;
+}
+
+.progress-fill.is-running {
+  background:
+    linear-gradient(
+      110deg,
+      rgba(13, 154, 135, 0.92) 0%,
+      rgba(72, 187, 153, 0.92) 35%,
+      rgba(173, 237, 223, 0.95) 50%,
+      rgba(72, 187, 153, 0.92) 65%,
+      rgba(13, 154, 135, 0.92) 100%
+    );
+  background-size: 220% 100%;
+  animation: progressShimmer 1.2s linear infinite;
+}
+
+@keyframes progressShimmer {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 0%;
+  }
+}
+
+.progress-lines {
+  margin-top: 6px;
+}
+
+.progress-lines p {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #283144;
+}
+
+.progress-lines p:last-child {
+  margin-bottom: 0;
+}
+
+.progress-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .title-box-head {

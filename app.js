@@ -708,6 +708,18 @@
 让用户看到后有收藏、点赞、转发欲望，觉得内容密、信息足、句句能直接用于写作；
 同时整体气质要贴合我账号一贯的小红书风格：文学感、治愈感、克制、柔和、安静、高级留白。`;
   var doubaoUserPromptTemplate = DOUBAO_USER_PROMPT_TEMPLATE;
+  var TASK_KEYS = Object.freeze({
+    json: "json",
+    titles: "titles"
+  });
+  var taskProgressState = {
+    json: createTaskProgressState(TASK_KEYS.json),
+    titles: createTaskProgressState(TASK_KEYS.titles)
+  };
+  var taskProgressTimers = {
+    json: null,
+    titles: null
+  };
   var titleGenerationState = {
     successItems: [],
     failureItems: []
@@ -813,7 +825,10 @@
         coverTopWeight: 500,
         coverTitleStartSize: 132,
         coverTitleMinSize: 86,
-        coverTitleWeight: 700,
+        coverTitleWeight: 900,
+        coverTitleStrokeWidth: 2.2,
+        coverTitleFauxBoldOffset: 0.9,
+        coverTitleFauxBoldPasses: 8,
         coverSubtitleStartSize: 60,
         coverSubtitleMinSize: 46,
         coverSubtitleWeight: 600,
@@ -875,7 +890,10 @@
         coverTopWeight: 500,
         coverTitleStartSize: 142,
         coverTitleMinSize: 82,
-        coverTitleWeight: 700,
+        coverTitleWeight: 900,
+        coverTitleStrokeWidth: 2.2,
+        coverTitleFauxBoldOffset: 0.9,
+        coverTitleFauxBoldPasses: 8,
         coverSubtitleStartSize: 60,
         coverSubtitleMinSize: 46,
         coverSubtitleWeight: 500
@@ -927,7 +945,10 @@
         coverTopWeight: 500,
         coverTitleStartSize: 140,
         coverTitleMinSize: 88,
-        coverTitleWeight: 700,
+        coverTitleWeight: 900,
+        coverTitleStrokeWidth: 2.2,
+        coverTitleFauxBoldOffset: 0.9,
+        coverTitleFauxBoldPasses: 8,
         coverSubtitleStartSize: 60,
         coverSubtitleMinSize: 44,
         coverSubtitleWeight: 500
@@ -979,7 +1000,10 @@
         coverTopWeight: 500,
         coverTitleStartSize: 122,
         coverTitleMinSize: 74,
-        coverTitleWeight: 700,
+        coverTitleWeight: 900,
+        coverTitleStrokeWidth: 2.2,
+        coverTitleFauxBoldOffset: 0.9,
+        coverTitleFauxBoldPasses: 8,
         coverSubtitleStartSize: 52,
         coverSubtitleMinSize: 40,
         coverSubtitleWeight: 500,
@@ -1042,7 +1066,10 @@
         coverTopWeight: 500,
         coverTitleStartSize: 122,
         coverTitleMinSize: 74,
-        coverTitleWeight: 700,
+        coverTitleWeight: 900,
+        coverTitleStrokeWidth: 2.2,
+        coverTitleFauxBoldOffset: 0.9,
+        coverTitleFauxBoldPasses: 8,
         coverSubtitleStartSize: 52,
         coverSubtitleMinSize: 40,
         coverSubtitleWeight: 500,
@@ -1106,8 +1133,11 @@
         coverTopSize: 58,
         coverTopWeight: 500,
         coverTitleStartSize: 184,
-        coverTitleMinSize: 114,
-        coverTitleWeight: 700,
+        coverTitleMinSize: 96,
+        coverTitleWeight: 900,
+        coverTitleStrokeWidth: 2.2,
+        coverTitleFauxBoldOffset: 0.9,
+        coverTitleFauxBoldPasses: 8,
         coverSubtitleStartSize: 62,
         coverSubtitleMinSize: 42,
         coverSubtitleWeight: 500,
@@ -1127,7 +1157,7 @@
           topTextMaxLines: 1,
           titleCenterX: 540,
           titleY: 804,
-          titleWidth: 860,
+          titleWidth: 900,
           titleLineHeight: 132,
           titleMaxLines: 2,
           subtitleCenterX: 540,
@@ -1203,6 +1233,27 @@
     doubaoLayoutStyle: document.getElementById("doubaoLayoutStyle"),
     doubaoGenerateBtn: document.getElementById("doubaoGenerateBtn"),
     doubaoGenerateTitleBtn: document.getElementById("doubaoGenerateTitleBtn"),
+    taskOverviewCurrent: document.getElementById("taskOverviewCurrent"),
+    taskOverviewJson: document.getElementById("taskOverviewJson"),
+    taskOverviewTitles: document.getElementById("taskOverviewTitles"),
+    taskProgressPanel: document.getElementById("taskProgressPanel"),
+    taskProgressSummary: document.getElementById("taskProgressSummary"),
+    jsonTaskPercent: document.getElementById("jsonTaskPercent"),
+    jsonTaskBar: document.getElementById("jsonTaskBar"),
+    jsonTaskStatus: document.getElementById("jsonTaskStatus"),
+    jsonTaskTopic: document.getElementById("jsonTaskTopic"),
+    jsonTaskCount: document.getElementById("jsonTaskCount"),
+    jsonTaskStats: document.getElementById("jsonTaskStats"),
+    jsonTaskTime: document.getElementById("jsonTaskTime"),
+    titleTaskPercent: document.getElementById("titleTaskPercent"),
+    titleTaskBar: document.getElementById("titleTaskBar"),
+    titleTaskStatus: document.getElementById("titleTaskStatus"),
+    titleTaskTopic: document.getElementById("titleTaskTopic"),
+    titleTaskCount: document.getElementById("titleTaskCount"),
+    titleTaskStats: document.getElementById("titleTaskStats"),
+    titleTaskTime: document.getElementById("titleTaskTime"),
+    doubaoJsonDebug: document.getElementById("doubaoJsonDebug"),
+    doubaoJsonDebugOutput: document.getElementById("doubaoJsonDebugOutput"),
     doubaoCopyAllTitlesBtn: document.getElementById("doubaoCopyAllTitlesBtn"),
     doubaoTitleResultList: document.getElementById("doubaoTitleResultList"),
     doubaoTitleDebug: document.getElementById("doubaoTitleDebug"),
@@ -1220,6 +1271,7 @@
   hydrateDoubaoConfig();
   hydrateExternalDoubaoPromptTemplate();
   bindEvents();
+  resetAllTaskProgressUI();
   resetTitleGenerationPanel();
   maybeAutorunFromQuery();
 
@@ -1360,6 +1412,7 @@
     refs.jsonFolder.value = "";
     refs.resultList.innerHTML = "";
     refs.resultCount.textContent = "0 组";
+    resetAllTaskProgressUI();
     resetTitleGenerationPanel();
     clearMessages();
     setStatus("已清空输入与结果。");
@@ -1601,23 +1654,29 @@
 
   async function onDoubaoGenerateClick() {
     clearMessages();
+    clearTaskDebugContent(TASK_KEYS.json);
 
     var apiKey = sanitizeText(refs.doubaoApiKey.value);
-    var baseUrl = sanitizeText(refs.doubaoBaseUrl.value) || DOUBAO_DEFAULT_BASE_URL;
+    var baseUrlInput = sanitizeText(refs.doubaoBaseUrl.value);
+    var baseUrl = baseUrlInput || DOUBAO_DEFAULT_BASE_URL;
     var model = sanitizeText(refs.doubaoModel.value);
     var topicInput = String(refs.doubaoTopic.value || "");
     var pageCountInput = sanitizeText(refs.doubaoPageCount.value);
     var layoutStyleInput = normalizeDoubaoLayoutStyle(refs.doubaoLayoutStyle.value);
     var promptInput = parseDoubaoTopicInput(topicInput, pageCountInput);
+    var topics = promptInput.topics;
 
     var missing = [];
     if (!apiKey) {
       missing.push("豆包 API Key");
     }
+    if (!baseUrlInput) {
+      missing.push("豆包 Base URL");
+    }
     if (!model) {
       missing.push("豆包 模型/接入点ID");
     }
-    if (promptInput.topics.length === 0) {
+    if (topics.length === 0) {
       missing.push("主题");
     }
 
@@ -1635,62 +1694,122 @@
     writeStorage(STORAGE_KEYS.doubaoPageCount, pageCountInput || String(DOUBAO_DEFAULT_PAGE_COUNT));
     writeStorage(STORAGE_KEYS.doubaoLayoutStyle, layoutStyleInput);
 
-    var originalBtnText = refs.doubaoGenerateBtn.textContent || DOUBAO_GENERATE_BUTTON_TEXT;
+    var originalJsonBtnText = refs.doubaoGenerateBtn.textContent || DOUBAO_GENERATE_BUTTON_TEXT;
     refs.doubaoGenerateBtn.disabled = true;
-    refs.doubaoGenerateBtn.textContent = "生成中（0/" + promptInput.topics.length + "）...";
+    refs.doubaoGenerateBtn.textContent = "生成中（0/" + topics.length + "）...";
+
+    var repairWarnings = [];
 
     try {
-      setStatus("正在请求豆包生成 JSON...");
-      var generationResult = await handleGenerateFromTopic({
-        provider: "doubao",
-        apiKey: apiKey,
-        baseUrl: baseUrl,
-        model: model,
-        rawTopicInput: topicInput,
-        selectedPageCount: pageCountInput,
-        selectedLayoutStyle: layoutStyleInput,
-        temperature: 0.6,
-        onProgress: function (current, total) {
-          refs.doubaoGenerateBtn.textContent = "生成中（" + current + "/" + total + "）...";
-          setStatus("正在生成第 " + current + "/" + total + " 组...");
-        }
-      });
+      startTaskProgress(TASK_KEYS.json, topics.length, "正在批量生成 JSON...");
+      setStatus("正在批量生成 JSON...");
 
-      if (generationResult.successItems.length === 0) {
-        var allFailedWarnings = generationResult.failureItems.map(function (item) {
-          return "第 " + item.index + " 组「" + item.topic + "」失败：" + item.message;
-        });
+      var generationResult = await runBatchTask(
+        TASK_KEYS.json,
+        topics,
+        async function (topic) {
+          var generatedJson = await requestJsonByProvider("doubao", {
+            apiKey: apiKey,
+            baseUrl: baseUrl,
+            model: model,
+            topic: topic,
+            styleLabel: promptInput.styleLabel,
+            layoutStyle: layoutStyleInput,
+            pageCount: promptInput.pageCount,
+            temperature: 0.6
+          });
+
+          var repairNotes = [];
+          var repairedJson = repairGeneratedPayload(
+            generatedJson,
+            topic,
+            promptInput.styleLabel,
+            layoutStyleInput,
+            promptInput.pageCount,
+            repairNotes
+          );
+
+          try {
+            normalizeGroup(repairedJson, "主题生成结果");
+          } catch (error) {
+            throw new Error("JSON 协议校验失败：" + toErrorMessage(error));
+          }
+
+          return {
+            payload: repairedJson,
+            repairNotes: repairNotes
+          };
+        },
+        {
+          startStatusText: "正在批量生成 JSON...",
+          onItemStart: function (context) {
+            refs.doubaoGenerateBtn.textContent =
+              "生成中（" + context.index + "/" + context.total + "）...";
+          },
+          onItemSuccess: function (context) {
+            var value = context.value || {};
+            if (Array.isArray(value.repairNotes) && value.repairNotes.length > 0) {
+              repairWarnings.push(
+                "主题「" + context.topic + "」已自动修复：" + value.repairNotes.join("；")
+              );
+            }
+
+            refs.jsonInput.value = JSON.stringify(
+              buildJsonOutputPayload(context.successItems),
+              null,
+              2
+            );
+          },
+          onItemFailure: function (context) {
+            if (sanitizeText(context.error && context.error.rawContent)) {
+              setTaskDebugContent(TASK_KEYS.json, context.error.rawContent);
+            }
+          },
+          onItemDone: function (context) {
+            refs.doubaoGenerateBtn.textContent =
+              "生成中（" + context.completed + "/" + context.total + "）...";
+          },
+          successStatusText: "JSON 生成完成"
+        }
+      );
+
+      var successItems = generationResult.successItems.map(function (item) {
+        return {
+          index: item.index,
+          topic: item.topic,
+          payload: item.value.payload
+        };
+      });
+      var failureItems = generationResult.failureItems.slice();
+
+      if (successItems.length === 0) {
         showErrors(
-          ["未生成可用 JSON：成功 0 组，失败 " + generationResult.failureItems.length + " 组。"].concat(
-            allFailedWarnings
+          ["未生成可用 JSON：成功 0 组，失败 " + failureItems.length + " 组。"].concat(
+            failureItems.map(function (item) {
+              return "第 " + item.index + " 组「" + item.topic + "」失败：" + item.message;
+            })
           )
         );
-        setStatus("豆包生成失败：成功 0 组，失败 " + generationResult.failureItems.length + " 组。");
+        updateTaskProgress(TASK_KEYS.json, {
+          statusText: "JSON 生成完成（全部失败）"
+        });
+        setStatus("JSON 生成失败：成功 0 组，失败 " + failureItems.length + " 组。");
         return;
       }
 
-      var outputPayload =
-        generationResult.successItems.length === 1
-          ? generationResult.successItems[0].payload
-          : generationResult.successItems.map(function (item) {
-              return item.payload;
-            });
-      refs.jsonInput.value = JSON.stringify(outputPayload, null, 2);
+      refs.jsonInput.value = JSON.stringify(buildJsonOutputPayload(generationResult.successItems), null, 2);
 
-      var warningItems = [];
-      if (generationResult.repairWarnings.length > 0) {
-        warningItems = warningItems.concat(generationResult.repairWarnings);
-      }
-      if (generationResult.failureItems.length > 0) {
+      var warningItems = repairWarnings.slice();
+      if (failureItems.length > 0) {
         warningItems.push(
-          "批量生成完成：成功 " +
-            generationResult.successItems.length +
+          "JSON 批量生成完成：成功 " +
+            successItems.length +
             " 组，失败 " +
-            generationResult.failureItems.length +
+            failureItems.length +
             " 组。"
         );
         warningItems = warningItems.concat(
-          generationResult.failureItems.map(function (item) {
+          failureItems.map(function (item) {
             return "第 " + item.index + " 组「" + item.topic + "」失败：" + item.message;
           })
         );
@@ -1699,40 +1818,39 @@
         showWarnings(warningItems);
       }
 
-      if (generationResult.failureItems.length > 0) {
-        setStatus(
-          "豆包批量生成完成：成功 " +
-            generationResult.successItems.length +
-            " 组，失败 " +
-            generationResult.failureItems.length +
-            " 组。"
-        );
+      if (failureItems.length > 0) {
+        setStatus("JSON 生成完成：成功 " + successItems.length + " 组，失败 " + failureItems.length + " 组。");
       } else {
         setStatus(
-          "豆包生成成功：共 " +
-            generationResult.successItems.length +
+          "JSON 生成成功：共 " +
+            successItems.length +
             " 组，JSON 已写入输入框，可直接点击“开始渲染”。"
         );
       }
     } catch (error) {
+      if (sanitizeText(error && error.rawContent)) {
+        setTaskDebugContent(TASK_KEYS.json, error.rawContent);
+      }
+      failTaskProgress(TASK_KEYS.json, "JSON 生成失败");
       showErrors(["豆包生成失败：" + toErrorMessage(error)]);
       setStatus("豆包生成失败。");
     } finally {
+      finishTaskProgress(TASK_KEYS.json);
       refs.doubaoGenerateBtn.disabled = false;
-      refs.doubaoGenerateBtn.textContent = originalBtnText;
+      refs.doubaoGenerateBtn.textContent = originalJsonBtnText;
     }
   }
 
   async function onDoubaoGenerateTitleClick() {
     clearMessages();
+    clearTaskDebugContent(TASK_KEYS.titles);
     clearTitleDebugContent();
 
     var apiKey = sanitizeText(refs.doubaoApiKey.value);
     var baseUrlInput = sanitizeText(refs.doubaoBaseUrl.value);
     var baseUrl = baseUrlInput || DOUBAO_DEFAULT_BASE_URL;
     var model = sanitizeText(refs.doubaoModel.value);
-    var topicInput = String(refs.doubaoTopic.value || "");
-    var topics = parseTopicBatchInput(topicInput);
+    var topics = parseTopicsFromTextarea(refs.doubaoTopic.value);
 
     var missing = [];
     if (!apiKey) {
@@ -1759,169 +1877,253 @@
     writeStorage(STORAGE_KEYS.doubaoBaseUrl, baseUrl);
     writeStorage(STORAGE_KEYS.doubaoModel, model);
 
-    var originalBtnText =
+    var originalTitleBtnText =
       refs.doubaoGenerateTitleBtn.textContent || DOUBAO_TITLE_GENERATE_BUTTON_TEXT;
     refs.doubaoGenerateTitleBtn.disabled = true;
-    refs.doubaoGenerateTitleBtn.textContent = "批量生成标题中...";
-    renderTitlePlaceholder("正在批量生成标题...");
-    setStatus("正在批量生成标题...");
+    refs.doubaoGenerateTitleBtn.textContent = "生成中（0/" + topics.length + "）...";
+    renderTitlePlaceholder("正在生成标题...");
 
     try {
-      var generationResult = await generateTitleByBatchWithFallback({
-        apiKey: apiKey,
-        baseUrl: baseUrl,
-        model: model,
-        topics: topics,
-        temperature: 0.9,
-        onFallbackProgress: function (current, total) {
-          refs.doubaoGenerateTitleBtn.textContent = "逐条补救中（" + current + "/" + total + "）...";
-          setStatus("正在生成第 " + current + "/" + total + " 个主题标题...");
-        }
-      });
+      startTaskProgress(TASK_KEYS.titles, topics.length, "正在批量生成标题...");
+      setStatus("正在批量生成标题...");
 
-      renderTitleGenerationResults(generationResult.successItems, generationResult.failureItems);
-
-      var warningItems = generationResult.warnings.slice();
-      if (generationResult.failureItems.length > 0) {
-        warningItems.push(
-          "标题生成完成：成功 " +
-            generationResult.successItems.length +
-            " 组，失败 " +
-            generationResult.failureItems.length +
-            " 组。"
-        );
-        warningItems = warningItems.concat(
-          generationResult.failureItems.map(function (item) {
-            return "第 " + item.index + " 组「" + item.topic + "」失败：" + item.message;
-          })
-        );
-      }
-      if (warningItems.length > 0) {
-        showWarnings(warningItems);
-      }
-
-      if (generationResult.successItems.length === 0) {
-        showErrors(["标题生成失败：未生成可用标题。"]);
-        setStatus(
-          "标题生成失败：成功 0 组，失败 " + generationResult.failureItems.length + " 组。"
-        );
-        return;
-      }
-
-      if (generationResult.failureItems.length > 0) {
-        setStatus(
-          "标题批量生成完成：成功 " +
-            generationResult.successItems.length +
-            " 组，失败 " +
-            generationResult.failureItems.length +
-            " 组。"
-        );
-      } else {
-        setStatus("标题生成成功：共 " + generationResult.successItems.length + " 组。");
-      }
-    } catch (error) {
-      if (sanitizeText(error && error.rawContent)) {
-        setTitleDebugContent(error.rawContent);
-      }
-      showErrors(["标题生成失败：" + toErrorMessage(error)]);
-      setStatus("标题生成失败。");
-      renderTitlePlaceholder("等待生成标题");
-    } finally {
-      refs.doubaoGenerateTitleBtn.disabled = false;
-      refs.doubaoGenerateTitleBtn.textContent = originalBtnText;
-    }
-  }
-
-  async function generateTitleByBatchWithFallback(options) {
-    var topicEntries = options.topics.map(function (topic, idx) {
-      return {
-        index: idx + 1,
-        topic: topic
-      };
-    });
-    var warnings = [];
-    var successItems = [];
-    var retryEntries = topicEntries.slice();
-
-    try {
-      var batchResult = await requestDoubaoTitleBatch({
-        apiKey: options.apiKey,
-        baseUrl: options.baseUrl,
-        model: options.model,
-        topics: options.topics,
-        temperature: options.temperature
-      });
-      var normalizedBatch = normalizeTitleGenerationPayload(batchResult.payload, options.topics);
-      successItems = normalizedBatch.successItems.slice();
-      warnings = warnings.concat(normalizedBatch.warnings);
-      retryEntries = normalizedBatch.failureItems.map(function (item) {
-        return {
-          index: item.index,
-          topic: item.topic
-        };
-      });
-    } catch (error) {
-      if (sanitizeText(error && error.rawContent)) {
-        setTitleDebugContent(error.rawContent);
-      }
-      warnings.push("批量请求失败，已自动降级为逐条生成：" + toErrorMessage(error));
-      retryEntries = topicEntries.slice();
-    }
-
-    var failureItems = [];
-    if (retryEntries.length > 0) {
-      for (var i = 0; i < retryEntries.length; i += 1) {
-        var entry = retryEntries[i];
-        if (typeof options.onFallbackProgress === "function") {
-          options.onFallbackProgress(i + 1, retryEntries.length, entry.topic);
-        }
-
-        try {
+      var generationResult = await runBatchTask(
+        TASK_KEYS.titles,
+        topics,
+        async function (topic) {
           var singleResult = await requestDoubaoTitleBatch({
-            apiKey: options.apiKey,
-            baseUrl: options.baseUrl,
-            model: options.model,
-            topics: [entry.topic],
-            temperature: options.temperature
+            apiKey: apiKey,
+            baseUrl: baseUrl,
+            model: model,
+            topics: [topic],
+            temperature: 0.9
           });
-          var normalizedSingle = normalizeTitleGenerationPayload(singleResult.payload, [entry.topic]);
+          var normalizedSingle = normalizeTitleGenerationPayload(singleResult.payload, [topic]);
           if (normalizedSingle.successItems.length === 0) {
             throw new Error(
               normalizedSingle.failureItems.length > 0
                 ? normalizedSingle.failureItems[0].message
-                : "逐条请求未返回可用标题。"
+                : "未返回可用标题。"
             );
           }
 
-          successItems.push({
-            index: entry.index,
-            topic: entry.topic,
+          return {
             titles: normalizedSingle.successItems[0].titles
+          };
+        },
+        {
+          startStatusText: "正在批量生成标题...",
+          onItemStart: function (context) {
+            refs.doubaoGenerateTitleBtn.textContent =
+              "生成中（" + context.index + "/" + context.total + "）...";
+          },
+          onItemSuccess: function (context) {
+            renderTitleGenerationResults(
+              mapTitleSuccessItems(context.successItems),
+              mapTitleFailureItems(context.failureItems)
+            );
+          },
+          onItemFailure: function (context) {
+            if (sanitizeText(context.error && context.error.rawContent)) {
+              setTaskDebugContent(TASK_KEYS.titles, context.error.rawContent);
+              setTitleDebugContent(context.error.rawContent);
+            }
+            renderTitleGenerationResults(
+              mapTitleSuccessItems(context.successItems),
+              mapTitleFailureItems(context.failureItems)
+            );
+          },
+          onItemDone: function (context) {
+            refs.doubaoGenerateTitleBtn.textContent =
+              "生成中（" + context.completed + "/" + context.total + "）...";
+          },
+          successStatusText: "标题生成完成"
+        }
+      );
+
+      var successItems = mapTitleSuccessItems(generationResult.successItems);
+      var failureItems = mapTitleFailureItems(generationResult.failureItems);
+      renderTitleGenerationResults(successItems, failureItems);
+
+      if (successItems.length === 0) {
+        showErrors(["标题生成失败：未生成可用标题。"]);
+        updateTaskProgress(TASK_KEYS.titles, {
+          statusText: "标题生成完成（全部失败）"
+        });
+        setStatus("标题生成失败：成功 0 组，失败 " + failureItems.length + " 组。");
+        return;
+      }
+
+      if (failureItems.length > 0) {
+        showWarnings(
+          failureItems.map(function (item) {
+            return "第 " + item.index + " 组「" + item.topic + "」失败：" + item.message;
+          })
+        );
+        setStatus("标题生成完成：成功 " + successItems.length + " 组，失败 " + failureItems.length + " 组。");
+      } else {
+        setStatus("标题生成成功：共 " + successItems.length + " 组。");
+      }
+    } catch (error) {
+      if (sanitizeText(error && error.rawContent)) {
+        setTaskDebugContent(TASK_KEYS.titles, error.rawContent);
+        setTitleDebugContent(error.rawContent);
+      }
+      failTaskProgress(TASK_KEYS.titles, "标题生成失败");
+      showErrors(["标题生成失败：" + toErrorMessage(error)]);
+      setStatus("标题生成失败。");
+      renderTitlePlaceholder("等待生成标题");
+    } finally {
+      finishTaskProgress(TASK_KEYS.titles);
+      refs.doubaoGenerateTitleBtn.disabled = false;
+      refs.doubaoGenerateTitleBtn.textContent = originalTitleBtnText;
+    }
+  }
+
+  function buildJsonOutputPayload(successItems) {
+    var list = Array.isArray(successItems) ? successItems : [];
+    var payloads = list
+      .map(function (item) {
+        return item && item.value ? item.value.payload : null;
+      })
+      .filter(Boolean);
+
+    if (payloads.length <= 1) {
+      return payloads[0] || {};
+    }
+
+    return payloads;
+  }
+
+  function mapTitleSuccessItems(items) {
+    var list = Array.isArray(items) ? items : [];
+    return list.map(function (item) {
+      return {
+        index: item.index,
+        topic: item.topic,
+        titles: item.value && Array.isArray(item.value.titles) ? item.value.titles : []
+      };
+    });
+  }
+
+  function mapTitleFailureItems(items) {
+    var list = Array.isArray(items) ? items : [];
+    return list.map(function (item) {
+      return {
+        index: item.index,
+        topic: item.topic,
+        message: item.message
+      };
+    });
+  }
+
+  async function runBatchTask(taskKey, topics, handler, options) {
+    var opts = options || {};
+    var topicList = Array.isArray(topics) ? topics.slice() : [];
+    var successItems = [];
+    var failureItems = [];
+
+    if (topicList.length === 0) {
+      return {
+        successItems: successItems,
+        failureItems: failureItems
+      };
+    }
+
+    if (!taskProgressState[taskKey].isRunning) {
+      startTaskProgress(taskKey, topicList.length, opts.startStatusText || "任务进行中...");
+    }
+
+    for (var i = 0; i < topicList.length; i += 1) {
+      var topic = topicList[i];
+      var index = i + 1;
+
+      updateTaskProgress(taskKey, {
+        statusText: "正在处理第 " + index + " / " + topicList.length + " 个主题...",
+        currentTopic: topic,
+        currentItemStartTime: Date.now()
+      });
+
+      if (typeof opts.onItemStart === "function") {
+        opts.onItemStart({
+          index: index,
+          total: topicList.length,
+          topic: topic,
+          completed: successItems.length + failureItems.length,
+          successItems: successItems.slice(),
+          failureItems: failureItems.slice()
+        });
+      }
+
+      try {
+        var value = await handler(topic, index, topicList.length);
+        var successItem = {
+          index: index,
+          topic: topic,
+          value: value
+        };
+        successItems.push(successItem);
+        if (typeof opts.onItemSuccess === "function") {
+          opts.onItemSuccess({
+            index: index,
+            total: topicList.length,
+            topic: topic,
+            value: value,
+            successItems: successItems.slice(),
+            failureItems: failureItems.slice()
           });
-        } catch (error) {
-          if (sanitizeText(error && error.rawContent)) {
-            setTitleDebugContent(error.rawContent);
-          }
-          failureItems.push({
-            index: entry.index,
-            topic: entry.topic,
-            message: toErrorMessage(error)
+        }
+      } catch (error) {
+        var failureItem = {
+          index: index,
+          topic: topic,
+          message: toErrorMessage(error),
+          error: error
+        };
+        failureItems.push(failureItem);
+        if (typeof opts.onItemFailure === "function") {
+          opts.onItemFailure({
+            index: index,
+            total: topicList.length,
+            topic: topic,
+            error: error,
+            successItems: successItems.slice(),
+            failureItems: failureItems.slice()
           });
         }
       }
+
+      updateTaskProgress(taskKey, {
+        completed: index,
+        success: successItems.length,
+        failed: failureItems.length,
+        itemDurationMs:
+          taskProgressState[taskKey] && taskProgressState[taskKey].currentItemStartTime
+            ? Math.max(0, Date.now() - taskProgressState[taskKey].currentItemStartTime)
+            : 0,
+        statusText:
+          index >= topicList.length
+            ? "正在整理结果..."
+            : "已完成 " + index + " / " + topicList.length + "，继续处理中..."
+      });
+
+      if (typeof opts.onItemDone === "function") {
+        opts.onItemDone({
+          index: index,
+          total: topicList.length,
+          topic: topic,
+          completed: index,
+          successItems: successItems.slice(),
+          failureItems: failureItems.slice()
+        });
+      }
     }
 
-    successItems.sort(function (a, b) {
-      return a.index - b.index;
-    });
-    failureItems.sort(function (a, b) {
-      return a.index - b.index;
-    });
+    completeTaskProgress(taskKey, opts.successStatusText || "任务完成");
 
     return {
       successItems: successItems,
-      failureItems: failureItems,
-      warnings: warnings
+      failureItems: failureItems
     };
   }
 
@@ -2084,72 +2286,6 @@
     return normalized;
   }
 
-  async function handleGenerateFromTopic(options) {
-    var parsedInput = parseDoubaoTopicInput(options.rawTopicInput, options.selectedPageCount);
-    var selectedLayoutStyle = normalizeDoubaoLayoutStyle(options.selectedLayoutStyle);
-    var topics = parsedInput.topics;
-    var successItems = [];
-    var failureItems = [];
-    var repairWarnings = [];
-
-    for (var i = 0; i < topics.length; i += 1) {
-      var topic = topics[i];
-      if (typeof options.onProgress === "function") {
-        options.onProgress(i + 1, topics.length, topic);
-      }
-
-      try {
-        var generatedJson = await requestJsonByProvider(options.provider, {
-          apiKey: options.apiKey,
-          baseUrl: options.baseUrl,
-          model: options.model,
-          topic: topic,
-          styleLabel: parsedInput.styleLabel,
-          layoutStyle: selectedLayoutStyle,
-          pageCount: parsedInput.pageCount,
-          temperature: options.temperature
-        });
-        var repairNotes = [];
-        var repairedJson = repairGeneratedPayload(
-          generatedJson,
-          topic,
-          parsedInput.styleLabel,
-          selectedLayoutStyle,
-          parsedInput.pageCount,
-          repairNotes
-        );
-
-        try {
-          normalizeGroup(repairedJson, "主题生成结果#" + (i + 1));
-        } catch (error) {
-          throw new Error("JSON 协议校验失败：" + toErrorMessage(error));
-        }
-
-        if (repairNotes.length > 0) {
-          repairWarnings.push("主题「" + topic + "」已自动修复：" + repairNotes.join("；"));
-        }
-
-        successItems.push({
-          index: i + 1,
-          topic: topic,
-          payload: repairedJson
-        });
-      } catch (error) {
-        failureItems.push({
-          index: i + 1,
-          topic: topic,
-          message: toErrorMessage(error)
-        });
-      }
-    }
-
-    return {
-      successItems: successItems,
-      failureItems: failureItems,
-      repairWarnings: repairWarnings
-    };
-  }
-
   async function requestJsonByProvider(provider, requestOptions) {
     if (provider === "doubao") {
       return requestDoubaoJson(requestOptions);
@@ -2168,7 +2304,13 @@
 
   async function requestDoubaoJson(options) {
     var responseContent = await requestDoubaoCompletionText(options);
-    return parseGeneratedJsonText(responseContent);
+    try {
+      return parseGeneratedJsonText(responseContent);
+    } catch (error) {
+      var parseError = new Error("JSON 结果解析失败：" + toErrorMessage(error));
+      parseError.rawContent = responseContent;
+      throw parseError;
+    }
   }
 
   async function requestDoubaoCompletionText(options) {
@@ -2761,7 +2903,7 @@
     };
   }
 
-  function parseTopicBatchInput(raw) {
+  function parseTopicsFromTextarea(raw) {
     var lines = String(raw || "").split(/\r?\n/);
     var topics = [];
 
@@ -2796,6 +2938,10 @@
     }
 
     return topics;
+  }
+
+  function parseTopicBatchInput(raw) {
+    return parseTopicsFromTextarea(raw);
   }
 
   function extractLabeledValue(line, label) {
@@ -5386,36 +5532,111 @@
     var startSize = typography.coverTitleStartSize || 132;
     var minSize = typography.coverTitleMinSize || 98;
     var weight = typography.coverTitleWeight || 700;
+    var strokeWidth = Number(typography.coverTitleStrokeWidth || 0);
+    var fauxBoldOffset = Number(typography.coverTitleFauxBoldOffset || 0);
+    var widthPadding = Math.max(0, strokeWidth * 4 + fauxBoldOffset * 6);
+    var measureWidth = Math.max(120, maxWidth - widthPadding);
     var openQuote = "“";
     var closeQuote = "”";
-    var singleLineSize = findSingleLineCoverTitleSize(ctx, title, maxWidth, startSize, minSize, family);
+    var singleLineSize = findSingleLineCoverTitleSize(
+      ctx,
+      title,
+      measureWidth,
+      startSize,
+      minSize,
+      family
+    );
 
     ctx.fillStyle = colors.textPrimary || "#111111";
 
     if (singleLineSize) {
       var singleText = openQuote + title + closeQuote;
       ctx.font = String(weight) + " " + singleLineSize + "px " + family;
-      ctx.fillText(singleText, centerX - ctx.measureText(singleText).width / 2, box.titleY);
+      drawRifuCoverTitleText(
+        ctx,
+        singleText,
+        centerX - ctx.measureText(singleText).width / 2,
+        box.titleY,
+        typography,
+        colors.textPrimary || "#111111"
+      );
       return;
     }
 
-    var twoLineLayout = fitTwoLineQuotedCoverTitle(ctx, title, maxWidth, startSize, minSize, family);
+    var twoLineLayout = fitTwoLineQuotedCoverTitle(
+      ctx,
+      title,
+      measureWidth,
+      startSize,
+      minSize,
+      family
+    );
     ctx.font = String(weight) + " " + twoLineLayout.fontSize + "px " + family;
 
     if (!twoLineLayout.lines[1]) {
       var fallbackSingle = openQuote + twoLineLayout.lines[0] + closeQuote;
-      ctx.fillText(fallbackSingle, centerX - ctx.measureText(fallbackSingle).width / 2, box.titleY);
+      drawRifuCoverTitleText(
+        ctx,
+        fallbackSingle,
+        centerX - ctx.measureText(fallbackSingle).width / 2,
+        box.titleY,
+        typography,
+        colors.textPrimary || "#111111"
+      );
       return;
     }
 
     var firstLine = openQuote + twoLineLayout.lines[0];
     var secondLine = twoLineLayout.lines[1] + closeQuote;
-    ctx.fillText(firstLine, centerX - ctx.measureText(firstLine).width / 2, box.titleY);
-    ctx.fillText(
+    drawRifuCoverTitleText(
+      ctx,
+      firstLine,
+      centerX - ctx.measureText(firstLine).width / 2,
+      box.titleY,
+      typography,
+      colors.textPrimary || "#111111"
+    );
+    drawRifuCoverTitleText(
+      ctx,
       secondLine,
       centerX - ctx.measureText(secondLine).width / 2,
-      box.titleY + box.titleLineHeight
+      box.titleY + box.titleLineHeight,
+      typography,
+      colors.textPrimary || "#111111"
     );
+  }
+
+  function drawRifuCoverTitleText(ctx, text, x, y, typography, color) {
+    var strokeWidth = Number(typography.coverTitleStrokeWidth || 0);
+    var fauxBoldOffset = Number(typography.coverTitleFauxBoldOffset || 0);
+    var fauxBoldPasses = parseInt(typography.coverTitleFauxBoldPasses, 10);
+    if (Number.isNaN(fauxBoldPasses) || fauxBoldPasses < 0) {
+      fauxBoldPasses = 0;
+    }
+    fauxBoldPasses = Math.min(24, fauxBoldPasses);
+
+    ctx.fillStyle = color;
+
+    if (strokeWidth > 0) {
+      ctx.strokeStyle = color;
+      ctx.lineJoin = "round";
+      ctx.miterLimit = 2;
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeText(text, x, y);
+    }
+
+    if (fauxBoldOffset > 0 && fauxBoldPasses > 0) {
+      for (var i = 0; i < fauxBoldPasses; i += 1) {
+        var rad = (Math.PI * 2 * i) / fauxBoldPasses;
+        ctx.fillText(
+          text,
+          x + Math.cos(rad) * fauxBoldOffset,
+          y + Math.sin(rad) * fauxBoldOffset
+        );
+      }
+    }
+
+    ctx.fillText(text, x, y);
   }
 
   function drawXiangxiangPage(ctx, group, page, finalType, warnings) {
@@ -7242,6 +7463,387 @@
     return task;
   }
 
+  function createTaskProgressState(taskKey) {
+    return {
+      taskKey: taskKey,
+      isRunning: false,
+      total: 0,
+      completed: 0,
+      success: 0,
+      failed: 0,
+      currentTopic: "",
+      currentItemStartTime: 0,
+      itemDurationsMs: [],
+      etaReady: false,
+      startTime: 0,
+      elapsedMs: 0,
+      averageMs: 0,
+      remainingMs: 0,
+      percent: 0,
+      statusText: "等待开始",
+      summaryText: "未开始"
+    };
+  }
+
+  function resetAllTaskProgressUI() {
+    resetTaskProgressState(TASK_KEYS.json, "等待开始");
+    resetTaskProgressState(TASK_KEYS.titles, "等待开始");
+    clearTaskDebugContent(TASK_KEYS.json);
+    clearTaskDebugContent(TASK_KEYS.titles);
+    if (refs.taskProgressPanel) {
+      refs.taskProgressPanel.open = false;
+    }
+    renderTaskOverview();
+  }
+
+  function resetTaskProgressState(taskKey, statusText) {
+    taskProgressState[taskKey] = createTaskProgressState(taskKey);
+    taskProgressState[taskKey].statusText = statusText || "等待开始";
+    taskProgressState[taskKey].summaryText = "未开始";
+    stopTaskProgressTimer(taskKey);
+    renderTaskProgress(taskKey);
+  }
+
+  function startTaskProgress(taskKey, total, startStatusText) {
+    var state = taskProgressState[taskKey];
+    if (!state) {
+      return;
+    }
+    state.isRunning = true;
+    state.total = Math.max(0, Number(total) || 0);
+    state.completed = 0;
+    state.success = 0;
+    state.failed = 0;
+    state.currentTopic = "";
+    state.currentItemStartTime = 0;
+    state.itemDurationsMs = [];
+    state.etaReady = false;
+    state.startTime = Date.now();
+    state.elapsedMs = 0;
+    state.averageMs = 0;
+    state.remainingMs = 0;
+    state.percent = 0;
+    state.statusText = startStatusText || "任务开始";
+    state.summaryText = "进行中（0/" + state.total + "）";
+    if (refs.taskProgressPanel) {
+      refs.taskProgressPanel.open = true;
+    }
+    renderTaskProgress(taskKey);
+    renderTaskOverview();
+    startTaskProgressTimer(taskKey);
+  }
+
+  function completeTaskProgress(taskKey, doneStatusText) {
+    var state = taskProgressState[taskKey];
+    if (!state) {
+      return;
+    }
+    state.isRunning = false;
+    state.currentTopic = "";
+    state.currentItemStartTime = 0;
+    state.completed = Math.min(state.total, state.completed);
+    state.percent = state.total > 0 ? Math.round((state.completed / state.total) * 100) : 0;
+    state.statusText = doneStatusText || "任务完成";
+    refreshTaskProgressTime(taskKey);
+    state.remainingMs = 0;
+    if (state.failed > 0 && state.success > 0) {
+      state.summaryText = "部分失败（成功 " + state.success + " / 失败 " + state.failed + "）";
+    } else if (state.failed > 0 && state.success === 0) {
+      state.summaryText = "失败（0/" + state.total + "）";
+    } else if (state.total > 0) {
+      state.summaryText = "已完成（" + state.total + "/" + state.total + "）";
+    } else {
+      state.summaryText = "未开始";
+    }
+    stopTaskProgressTimer(taskKey);
+    renderTaskProgress(taskKey);
+    renderTaskOverview();
+  }
+
+  function failTaskProgress(taskKey, statusText) {
+    var state = taskProgressState[taskKey];
+    if (!state) {
+      return;
+    }
+    state.isRunning = false;
+    state.currentItemStartTime = 0;
+    refreshTaskProgressTime(taskKey);
+    state.remainingMs = 0;
+    state.statusText = statusText || "任务失败";
+    if (state.failed > 0 && state.success > 0) {
+      state.summaryText = "部分失败（成功 " + state.success + " / 失败 " + state.failed + "）";
+    } else if (state.failed > 0) {
+      state.summaryText = "失败（0/" + state.total + "）";
+    } else {
+      state.summaryText = "失败";
+    }
+    stopTaskProgressTimer(taskKey);
+    renderTaskProgress(taskKey);
+    renderTaskOverview();
+  }
+
+  function finishTaskProgress(taskKey) {
+    var state = taskProgressState[taskKey];
+    if (!state || state.isRunning) {
+      return;
+    }
+    stopTaskProgressTimer(taskKey);
+    renderTaskProgress(taskKey);
+    renderTaskOverview();
+  }
+
+  function startTaskProgressTimer(taskKey) {
+    stopTaskProgressTimer(taskKey);
+    taskProgressTimers[taskKey] = setInterval(function () {
+      if (!taskProgressState[taskKey] || !taskProgressState[taskKey].isRunning) {
+        stopTaskProgressTimer(taskKey);
+        return;
+      }
+      refreshTaskProgressTime(taskKey);
+      renderTaskProgress(taskKey);
+      renderTaskOverview();
+    }, 1000);
+  }
+
+  function stopTaskProgressTimer(taskKey) {
+    var timer = taskProgressTimers[taskKey];
+    if (timer) {
+      clearInterval(timer);
+      taskProgressTimers[taskKey] = null;
+    }
+  }
+
+  function updateTaskProgress(taskKey, patch) {
+    var state = taskProgressState[taskKey];
+    if (!state) {
+      return;
+    }
+    var nextPatch = patch || {};
+    var itemDurationMs = Number(nextPatch.itemDurationMs || 0);
+    if (itemDurationMs > 0) {
+      state.itemDurationsMs.push(itemDurationMs);
+      if (state.itemDurationsMs.length > 50) {
+        state.itemDurationsMs.shift();
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(nextPatch, "itemDurationMs")) {
+      delete nextPatch.itemDurationMs;
+    }
+    Object.assign(state, nextPatch);
+    if (state.total > 0) {
+      state.percent = Math.round((Math.min(state.completed, state.total) / state.total) * 100);
+    } else {
+      state.percent = 0;
+    }
+    if (state.isRunning) {
+      state.summaryText = "进行中（" + state.completed + "/" + state.total + "）";
+    }
+    refreshTaskProgressTime(taskKey);
+    renderTaskProgress(taskKey);
+    renderTaskOverview();
+  }
+
+  function refreshTaskProgressTime(taskKey) {
+    var state = taskProgressState[taskKey];
+    if (!state || !state.startTime) {
+      return;
+    }
+    var currentItemElapsedMs =
+      state.isRunning && state.currentItemStartTime
+        ? Math.max(0, Date.now() - state.currentItemStartTime)
+        : 0;
+    var timing = computeEta(
+      state.startTime,
+      state.completed,
+      state.total,
+      state.itemDurationsMs,
+      currentItemElapsedMs
+    );
+    state.elapsedMs = timing.elapsedMs;
+    state.averageMs = timing.averageMs;
+    state.remainingMs = state.isRunning ? timing.remainingMs : 0;
+    state.etaReady = !!timing.etaReady && state.isRunning;
+  }
+
+  function computeEta(startTime, completed, total, itemDurationsMs, currentItemElapsedMs) {
+    var start = Number(startTime) || 0;
+    if (!start) {
+      return {
+        elapsedMs: 0,
+        averageMs: 0,
+        remainingMs: 0,
+        etaReady: false
+      };
+    }
+
+    var elapsedMs = Math.max(0, Date.now() - start);
+    var done = Math.max(0, Number(completed) || 0);
+    var all = Math.max(0, Number(total) || 0);
+    var durations = Array.isArray(itemDurationsMs) ? itemDurationsMs : [];
+    var averageMs = 0;
+    if (durations.length > 0) {
+      var durationSum = 0;
+      for (var i = 0; i < durations.length; i += 1) {
+        durationSum += Math.max(0, Number(durations[i]) || 0);
+      }
+      averageMs = durationSum / durations.length;
+    } else if (done > 0) {
+      averageMs = elapsedMs / done;
+    }
+
+    var remainingMs = done > 0 ? Math.max(0, all - done) * averageMs : 0;
+    var currentElapsed = Math.max(0, Number(currentItemElapsedMs) || 0);
+    if (remainingMs > 0 && averageMs > 0 && currentElapsed > 0) {
+      remainingMs = Math.max(0, remainingMs - Math.min(currentElapsed, averageMs * 0.85));
+    }
+    var etaReady = durations.length >= 2 && done > 0 && all > done;
+
+    return {
+      elapsedMs: elapsedMs,
+      averageMs: averageMs,
+      remainingMs: remainingMs,
+      etaReady: etaReady
+    };
+  }
+
+  function formatDuration(ms) {
+    var value = Math.max(0, Number(ms) || 0);
+    var totalSeconds = Math.round(value / 1000);
+    var minutes = Math.floor(totalSeconds / 60);
+    var seconds = totalSeconds % 60;
+
+    if (minutes <= 0) {
+      return String(seconds) + "秒";
+    }
+    return String(minutes) + "分" + String(seconds) + "秒";
+  }
+
+  function renderTaskProgress(taskKey) {
+    var state = taskProgressState[taskKey];
+    if (!state) {
+      return;
+    }
+
+    var isJson = taskKey === TASK_KEYS.json;
+    var percentNode = isJson ? refs.jsonTaskPercent : refs.titleTaskPercent;
+    var barNode = isJson ? refs.jsonTaskBar : refs.titleTaskBar;
+    var statusNode = isJson ? refs.jsonTaskStatus : refs.titleTaskStatus;
+    var topicNode = isJson ? refs.jsonTaskTopic : refs.titleTaskTopic;
+    var countNode = isJson ? refs.jsonTaskCount : refs.titleTaskCount;
+    var statsNode = isJson ? refs.jsonTaskStats : refs.titleTaskStats;
+    var timeNode = isJson ? refs.jsonTaskTime : refs.titleTaskTime;
+
+    if (percentNode) {
+      percentNode.textContent = String(state.percent) + "%";
+    }
+    if (barNode) {
+      barNode.style.width = String(state.percent) + "%";
+      barNode.classList.toggle("is-running", !!state.isRunning);
+    }
+    if (statusNode) {
+      statusNode.textContent = state.statusText || "等待开始";
+    }
+    if (topicNode) {
+      topicNode.textContent = "当前主题：" + (state.currentTopic || "-");
+    }
+    if (countNode) {
+      countNode.textContent = "进度：" + state.completed + " / " + state.total;
+    }
+    if (statsNode) {
+      statsNode.textContent = "成功 " + state.success + "，失败 " + state.failed;
+    }
+    if (timeNode) {
+      var currentItemElapsedText =
+        state.isRunning && state.currentItemStartTime
+          ? " · 当前主题已耗时 " + formatDuration(Date.now() - state.currentItemStartTime)
+          : "";
+      timeNode.textContent =
+        "已耗时 " +
+        formatDuration(state.elapsedMs) +
+        " · 平均每个主题 " +
+        (state.completed > 0 ? formatDuration(state.averageMs) : "--") +
+        " · 预计剩余 " +
+        (state.etaReady ? formatDuration(state.remainingMs) : "--") +
+        currentItemElapsedText;
+    }
+  }
+
+  function summarizeTaskOverviewState(taskKey) {
+    var state = taskProgressState[taskKey];
+    if (!state) {
+      return "未开始";
+    }
+    if (state.isRunning) {
+      return "进行中（" + state.completed + "/" + state.total + "）";
+    }
+    return state.summaryText || "未开始";
+  }
+
+  function renderTaskOverview() {
+    var isJsonRunning = taskProgressState.json.isRunning;
+    var isTitleRunning = taskProgressState.titles.isRunning;
+    var anyRunning = isJsonRunning || isTitleRunning;
+    if (refs.taskProgressPanel && anyRunning) {
+      refs.taskProgressPanel.open = true;
+    }
+
+    if (refs.taskProgressSummary) {
+      refs.taskProgressSummary.textContent = anyRunning
+        ? "生成任务进度（运行中，点击展开/收起）"
+        : "生成任务进度（空闲，点击展开）";
+    }
+
+    if (refs.taskOverviewCurrent) {
+      if (isJsonRunning && isTitleRunning) {
+        refs.taskOverviewCurrent.textContent = "并行执行（JSON + 标题）";
+      } else if (isJsonRunning) {
+        refs.taskOverviewCurrent.textContent = "JSON 生成中";
+      } else if (isTitleRunning) {
+        refs.taskOverviewCurrent.textContent = "标题生成中";
+      } else {
+        refs.taskOverviewCurrent.textContent = "空闲";
+      }
+    }
+
+    if (refs.taskOverviewJson) {
+      refs.taskOverviewJson.textContent = summarizeTaskOverviewState(TASK_KEYS.json);
+    }
+    if (refs.taskOverviewTitles) {
+      refs.taskOverviewTitles.textContent = summarizeTaskOverviewState(TASK_KEYS.titles);
+    }
+  }
+
+  function clearTaskDebugContent(taskKey) {
+    var debugOutput =
+      taskKey === TASK_KEYS.json ? refs.doubaoJsonDebugOutput : refs.doubaoTitleDebugOutput;
+    var debugDetails = taskKey === TASK_KEYS.json ? refs.doubaoJsonDebug : refs.doubaoTitleDebug;
+    if (!debugOutput) {
+      return;
+    }
+    debugOutput.textContent = "暂无调试输出";
+    if (debugDetails) {
+      debugDetails.open = false;
+    }
+  }
+
+  function setTaskDebugContent(taskKey, rawText) {
+    var debugOutput =
+      taskKey === TASK_KEYS.json ? refs.doubaoJsonDebugOutput : refs.doubaoTitleDebugOutput;
+    var debugDetails = taskKey === TASK_KEYS.json ? refs.doubaoJsonDebug : refs.doubaoTitleDebug;
+    if (!debugOutput) {
+      return;
+    }
+
+    var content = String(rawText || "").trim();
+    if (!content) {
+      return;
+    }
+    debugOutput.textContent = content;
+    if (debugDetails) {
+      debugDetails.open = true;
+    }
+  }
+
   function resetTitleGenerationPanel() {
     titleGenerationState.successItems = [];
     titleGenerationState.failureItems = [];
@@ -7262,28 +7864,11 @@
   }
 
   function clearTitleDebugContent() {
-    if (!refs.doubaoTitleDebugOutput) {
-      return;
-    }
-    refs.doubaoTitleDebugOutput.textContent = "暂无调试输出";
-    if (refs.doubaoTitleDebug) {
-      refs.doubaoTitleDebug.open = false;
-    }
+    clearTaskDebugContent(TASK_KEYS.titles);
   }
 
   function setTitleDebugContent(rawText) {
-    if (!refs.doubaoTitleDebugOutput) {
-      return;
-    }
-
-    var content = String(rawText || "").trim();
-    if (!content) {
-      return;
-    }
-    refs.doubaoTitleDebugOutput.textContent = content;
-    if (refs.doubaoTitleDebug) {
-      refs.doubaoTitleDebug.open = true;
-    }
+    setTaskDebugContent(TASK_KEYS.titles, rawText);
   }
 
   function renderTitleGenerationResults(successItems, failureItems) {
