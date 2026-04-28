@@ -1220,11 +1220,23 @@
   });
 
   var imageCache = new Map();
+  var customBackgrounds = createDefaultCustomBackgrounds();
+  var activeRenderBackgrounds = null;
 
   var refs = {
     jsonInput: document.getElementById("jsonInput"),
     jsonFiles: document.getElementById("jsonFiles"),
     jsonFolder: document.getElementById("jsonFolder"),
+    coverBgFile: document.getElementById("coverBgFile"),
+    pageBgFile: document.getElementById("pageBgFile"),
+    coverBgPasteZone: document.getElementById("coverBgPasteZone"),
+    pageBgPasteZone: document.getElementById("pageBgPasteZone"),
+    coverBgMeta: document.getElementById("coverBgMeta"),
+    pageBgMeta: document.getElementById("pageBgMeta"),
+    coverBgPreview: document.getElementById("coverBgPreview"),
+    pageBgPreview: document.getElementById("pageBgPreview"),
+    coverBgClearBtn: document.getElementById("coverBgClearBtn"),
+    pageBgClearBtn: document.getElementById("pageBgClearBtn"),
     doubaoApiKey: document.getElementById("doubaoApiKey"),
     doubaoBaseUrl: document.getElementById("doubaoBaseUrl"),
     doubaoModel: document.getElementById("doubaoModel"),
@@ -1269,6 +1281,7 @@
   };
 
   hydrateDoubaoConfig();
+  hydrateBackgroundReplaceUI();
   hydrateExternalDoubaoPromptTemplate();
   bindEvents();
   resetAllTaskProgressUI();
@@ -1291,6 +1304,7 @@
     bindStorageOnInput(refs.doubaoModel, STORAGE_KEYS.doubaoModel);
     bindStorageOnInput(refs.doubaoPageCount, STORAGE_KEYS.doubaoPageCount);
     bindStorageOnInput(refs.doubaoLayoutStyle, STORAGE_KEYS.doubaoLayoutStyle);
+    bindBackgroundReplaceEvents();
     refs.doubaoLayoutStyle.addEventListener("change", function () {
       onDoubaoLayoutStyleChange().catch(function (error) {
         showErrors(["切换排版风格失败：" + toErrorMessage(error)]);
@@ -1358,6 +1372,192 @@
     inputEl.addEventListener("change", save);
   }
 
+  function createDefaultCustomBackgrounds() {
+    return {
+      coverDataUrl: "",
+      coverSource: "",
+      pageDataUrl: "",
+      pageSource: ""
+    };
+  }
+
+  function hydrateBackgroundReplaceUI() {
+    customBackgrounds = createDefaultCustomBackgrounds();
+    refreshBackgroundReplaceSlotUI("cover");
+    refreshBackgroundReplaceSlotUI("page");
+  }
+
+  function bindBackgroundReplaceEvents() {
+    bindBackgroundFileInput("cover", refs.coverBgFile);
+    bindBackgroundFileInput("page", refs.pageBgFile);
+    bindBackgroundPasteZone("cover", refs.coverBgPasteZone);
+    bindBackgroundPasteZone("page", refs.pageBgPasteZone);
+
+    if (refs.coverBgClearBtn) {
+      refs.coverBgClearBtn.addEventListener("click", function () {
+        clearBackgroundSlot("cover");
+      });
+    }
+    if (refs.pageBgClearBtn) {
+      refs.pageBgClearBtn.addEventListener("click", function () {
+        clearBackgroundSlot("page");
+      });
+    }
+  }
+
+  function bindBackgroundFileInput(slot, inputEl) {
+    if (!inputEl) {
+      return;
+    }
+
+    inputEl.addEventListener("change", function () {
+      var file = inputEl.files && inputEl.files[0];
+      if (!file) {
+        return;
+      }
+      setBackgroundSlotFromFile(slot, file, file.name || "本地图片").finally(function () {
+        inputEl.value = "";
+      });
+    });
+  }
+
+  function bindBackgroundPasteZone(slot, zoneEl) {
+    if (!zoneEl) {
+      return;
+    }
+
+    zoneEl.addEventListener("paste", function (event) {
+      var pastedFile = getPastedImageFile(event);
+      if (!pastedFile) {
+        showErrors(["未检测到图片内容。请先复制图片，再在对应区域按 Ctrl+V。"]);
+        setStatus("粘贴失败：没有图片。");
+        return;
+      }
+      event.preventDefault();
+      setBackgroundSlotFromFile(slot, pastedFile, "粘贴图片");
+    });
+  }
+
+  function getPastedImageFile(event) {
+    var clipboardData = event && event.clipboardData;
+    if (!clipboardData || !clipboardData.items || clipboardData.items.length === 0) {
+      return null;
+    }
+
+    for (var i = 0; i < clipboardData.items.length; i += 1) {
+      var item = clipboardData.items[i];
+      if (item && item.kind === "file" && /^image\//i.test(String(item.type || ""))) {
+        return item.getAsFile();
+      }
+    }
+
+    return null;
+  }
+
+  async function setBackgroundSlotFromFile(slot, file, sourceName) {
+    if (!file) {
+      return;
+    }
+
+    var slotLabel = slot === "cover" ? "封面" : "内页";
+    if (!/^image\//i.test(String(file.type || ""))) {
+      showErrors(["" + slotLabel + "底图必须是图片文件。"]);
+      setStatus(slotLabel + "底图设置失败。");
+      return;
+    }
+
+    try {
+      setStatus("正在读取" + slotLabel + "底图...");
+      var dataUrl = await readFileAsDataUrl(file);
+      await loadImage(dataUrl);
+
+      if (slot === "cover") {
+        customBackgrounds.coverDataUrl = dataUrl;
+        customBackgrounds.coverSource = sanitizeText(sourceName || file.name || "已设置");
+      } else {
+        customBackgrounds.pageDataUrl = dataUrl;
+        customBackgrounds.pageSource = sanitizeText(sourceName || file.name || "已设置");
+      }
+
+      refreshBackgroundReplaceSlotUI(slot);
+      setStatus(slotLabel + "底图已设置，渲染时将优先使用。");
+    } catch (error) {
+      showErrors([slotLabel + "底图读取失败：" + toErrorMessage(error)]);
+      setStatus(slotLabel + "底图设置失败。");
+    }
+  }
+
+  function clearBackgroundSlot(slot) {
+    if (slot === "cover") {
+      customBackgrounds.coverDataUrl = "";
+      customBackgrounds.coverSource = "";
+    } else {
+      customBackgrounds.pageDataUrl = "";
+      customBackgrounds.pageSource = "";
+    }
+
+    refreshBackgroundReplaceSlotUI(slot);
+    setStatus((slot === "cover" ? "封面" : "内页") + "底图已清除。");
+  }
+
+  function clearAllBackgroundSlots() {
+    customBackgrounds = createDefaultCustomBackgrounds();
+    refreshBackgroundReplaceSlotUI("cover");
+    refreshBackgroundReplaceSlotUI("page");
+  }
+
+  function refreshBackgroundReplaceSlotUI(slot) {
+    var dataUrl = slot === "cover" ? customBackgrounds.coverDataUrl : customBackgrounds.pageDataUrl;
+    var source = slot === "cover" ? customBackgrounds.coverSource : customBackgrounds.pageSource;
+    var metaEl = slot === "cover" ? refs.coverBgMeta : refs.pageBgMeta;
+    var previewEl = slot === "cover" ? refs.coverBgPreview : refs.pageBgPreview;
+    var clearBtn = slot === "cover" ? refs.coverBgClearBtn : refs.pageBgClearBtn;
+
+    if (clearBtn) {
+      clearBtn.disabled = !dataUrl;
+    }
+
+    if (metaEl) {
+      metaEl.textContent = dataUrl ? "当前：" + (source || "已设置图片") : "当前：未设置";
+    }
+
+    if (!previewEl) {
+      return;
+    }
+
+    previewEl.innerHTML = "";
+    previewEl.classList.toggle("is-empty", !dataUrl);
+    if (!dataUrl) {
+      previewEl.textContent = "未设置";
+      return;
+    }
+
+    var img = document.createElement("img");
+    img.src = dataUrl;
+    img.alt = (slot === "cover" ? "封面" : "内页") + "底图预览";
+    previewEl.appendChild(img);
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        resolve(String(reader.result || ""));
+      };
+      reader.onerror = function () {
+        reject(new Error("文件读取失败"));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function getCustomBackgroundSnapshot() {
+    return {
+      coverDataUrl: sanitizeText(customBackgrounds.coverDataUrl),
+      pageDataUrl: sanitizeText(customBackgrounds.pageDataUrl)
+    };
+  }
+
   function fillSample() {
     var sample = {
       style: "xiaoxing_lab",
@@ -1410,6 +1610,7 @@
     refs.jsonInput.value = "";
     refs.jsonFiles.value = "";
     refs.jsonFolder.value = "";
+    clearAllBackgroundSlots();
     refs.resultList.innerHTML = "";
     refs.resultCount.textContent = "0 组";
     resetAllTaskProgressUI();
@@ -3196,6 +3397,7 @@
 
       var warnings = new Set(collected.warnings);
       setStatus("正在渲染并导出 JPEG...");
+      activeRenderBackgrounds = getCustomBackgroundSnapshot();
 
       var allResults = [];
       for (var i = 0; i < collected.groups.length; i += 1) {
@@ -3213,6 +3415,7 @@
       showErrors(["渲染失败：" + toErrorMessage(error)]);
       setStatus("渲染失败。");
     } finally {
+      activeRenderBackgrounds = null;
       refs.renderBtn.disabled = false;
     }
   }
@@ -4600,6 +4803,17 @@
 
   async function drawBackground(ctx, group, pageType, isCover, warnings) {
     var profile = group.profile;
+    var customDataUri = resolveCustomBackground(isCover);
+    if (customDataUri) {
+      try {
+        var customImage = await loadImage(customDataUri);
+        ctx.drawImage(customImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        return;
+      } catch (error) {
+        warnings.add((isCover ? "封面" : "内页") + "自定义底图加载失败，已回退到样式底图。");
+      }
+    }
+
     var styleKey = profile.background.styleKey;
     var dataUri = resolveEmbeddedBackground(styleKey, pageType, isCover);
 
@@ -4635,6 +4849,15 @@
         " 背景缺失，已自动回退到内置渐变背景。"
     );
     drawFallbackGradient(ctx, pageType, isCover);
+  }
+
+  function resolveCustomBackground(isCover) {
+    var source = activeRenderBackgrounds || getCustomBackgroundSnapshot();
+    if (isCover) {
+      return sanitizeText(source.coverDataUrl) || null;
+    }
+
+    return sanitizeText(source.pageDataUrl) || null;
   }
 
   function resolveEmbeddedBackground(styleKey, pageType, isCover) {

@@ -26,20 +26,25 @@
       <section class="doubao-box">
         <h3 class="module-title">主题生成 JSON（豆包）</h3>
 
-        <div class="field">
-          <label for="doubaoApiKey">豆包 API Key</label>
-          <input id="doubaoApiKey" type="password" placeholder="请输入火山方舟 API Key">
-        </div>
+        <details class="compact-details compact-details-inset">
+          <summary>连接设置（API Key / Base URL / 接入点）</summary>
+          <div class="compact-details-body">
+            <div class="field">
+              <label for="doubaoApiKey">豆包 API Key</label>
+              <input id="doubaoApiKey" type="password" placeholder="请输入火山方舟 API Key">
+            </div>
 
-        <div class="field">
-          <label for="doubaoBaseUrl">豆包 Base URL</label>
-          <input id="doubaoBaseUrl" type="text" value="https://ark.cn-beijing.volces.com/api/v3">
-        </div>
+            <div class="field">
+              <label for="doubaoBaseUrl">豆包 Base URL</label>
+              <input id="doubaoBaseUrl" type="text" value="https://ark.cn-beijing.volces.com/api/v3">
+            </div>
 
-        <div class="field">
-          <label for="doubaoModel">豆包 模型/接入点ID</label>
-          <input id="doubaoModel" type="text" placeholder="例如：ep-xxxx-xxxx">
-        </div>
+            <div class="field">
+              <label for="doubaoModel">豆包 模型/接入点ID</label>
+              <input id="doubaoModel" type="text" placeholder="例如：ep-xxxx-xxxx">
+            </div>
+          </div>
+        </details>
 
         <div class="field">
           <label for="doubaoTopic">主题（支持多行批量，一行一个主题）</label>
@@ -48,30 +53,35 @@
 50个杀手代号"></textarea>
         </div>
 
-        <div class="field">
-          <label for="doubaoPageCount">生成图片页数</label>
-          <select id="doubaoPageCount">
-            <option value="4">4 页</option>
-            <option value="5" selected>5 页</option>
-            <option value="6">6 页</option>
-            <option value="7">7 页</option>
-            <option value="8">8 页</option>
-          </select>
-        </div>
+        <details class="compact-details compact-details-inset">
+          <summary>生成参数（页数 / 排版风格）</summary>
+          <div class="compact-details-body">
+            <div class="field">
+              <label for="doubaoPageCount">生成图片页数</label>
+              <select id="doubaoPageCount">
+                <option value="4">4 页</option>
+                <option value="5" selected>5 页</option>
+                <option value="6">6 页</option>
+                <option value="7">7 页</option>
+                <option value="8">8 页</option>
+              </select>
+            </div>
 
-        <div class="field">
-          <label for="doubaoLayoutStyle">生成排版风格</label>
-          <select id="doubaoLayoutStyle">
-            <option value="xiaoxing_lab" selected>小星写作实验室（xiaoxing_lab）</option>
-            <option value="banxia">半夏（banxia）</option>
-            <option value="zhishi">芝士（zhishi）</option>
-            <option value="xiangxiang">香香（xiangxiang）</option>
-            <option value="tailun">泰仑（tailun）</option>
-            <option value="xibo">喜播（xibo）</option>
-            <option value="rifu">日富（rifu）</option>
-            <option value="xiaoxing">小星（xiaoxing）</option>
-          </select>
-        </div>
+            <div class="field">
+              <label for="doubaoLayoutStyle">生成排版风格</label>
+              <select id="doubaoLayoutStyle">
+                <option value="xiaoxing_lab" selected>小星写作实验室（xiaoxing_lab）</option>
+                <option value="banxia">半夏（banxia）</option>
+                <option value="zhishi">芝士（zhishi）</option>
+                <option value="xiangxiang">香香（xiangxiang）</option>
+                <option value="tailun">泰仑（tailun）</option>
+                <option value="xibo">喜播（xibo）</option>
+                <option value="rifu">日富（rifu）</option>
+                <option value="xiaoxing">小星（xiaoxing）</option>
+              </select>
+            </div>
+          </div>
+        </details>
 
         <div class="actions">
           <button id="doubaoGenerateBtn" type="button" class="btn btn-secondary">根据主题生成 JSON（豆包）</button>
@@ -155,15 +165,59 @@
         </section>
       </section>
 
-      <div class="field">
-        <label for="jsonFiles">选择 JSON/TXT 文件（支持多选）</label>
-        <input id="jsonFiles" type="file" accept=".json,.txt,application/json,text/plain" multiple>
-      </div>
+      <details class="compact-details upload-panel">
+        <summary>文件输入（JSON/TXT，可多选或选文件夹）</summary>
+        <div class="compact-details-body">
+          <div class="field">
+            <label for="jsonFiles">选择 JSON/TXT 文件（支持多选）</label>
+            <input id="jsonFiles" type="file" accept=".json,.txt,application/json,text/plain" multiple>
+          </div>
 
-      <div class="field">
-        <label for="jsonFolder">选择 JSON/TXT 文件夹</label>
-        <input id="jsonFolder" type="file" webkitdirectory directory multiple>
-      </div>
+          <div class="field">
+            <label for="jsonFolder">选择 JSON/TXT 文件夹</label>
+            <input id="jsonFolder" type="file" webkitdirectory directory multiple>
+          </div>
+        </div>
+      </details>
+
+      <section class="bg-replace-box">
+        <h3 class="module-title">底图替换</h3>
+        <p class="bg-replace-hint">支持上传图片，或复制图片后在对应区域按 Ctrl+V 粘贴。</p>
+
+        <div class="bg-replace-grid">
+          <article class="bg-slot-card">
+            <div class="bg-slot-head">
+              <h4>封面底图</h4>
+              <button id="coverBgClearBtn" type="button" class="btn btn-ghost bg-clear-btn" disabled>清除</button>
+            </div>
+
+            <label for="coverBgFile" class="btn btn-ghost bg-file-btn">选择图片</label>
+            <input id="coverBgFile" type="file" accept="image/*">
+
+            <div id="coverBgPasteZone" class="bg-paste-zone" tabindex="0">
+              点击后按 Ctrl+V 粘贴图片
+            </div>
+            <p id="coverBgMeta" class="bg-meta">当前：未设置</p>
+            <div id="coverBgPreview" class="bg-preview is-empty">未设置</div>
+          </article>
+
+          <article class="bg-slot-card">
+            <div class="bg-slot-head">
+              <h4>内页底图</h4>
+              <button id="pageBgClearBtn" type="button" class="btn btn-ghost bg-clear-btn" disabled>清除</button>
+            </div>
+
+            <label for="pageBgFile" class="btn btn-ghost bg-file-btn">选择图片</label>
+            <input id="pageBgFile" type="file" accept="image/*">
+
+            <div id="pageBgPasteZone" class="bg-paste-zone" tabindex="0">
+              点击后按 Ctrl+V 粘贴图片
+            </div>
+            <p id="pageBgMeta" class="bg-meta">当前：未设置</p>
+            <div id="pageBgPreview" class="bg-preview is-empty">未设置</div>
+          </article>
+        </div>
+      </section>
 
       <div class="actions">
         <button id="fillSampleBtn" type="button" class="btn btn-secondary">填充示例</button>
