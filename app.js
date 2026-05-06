@@ -991,25 +991,25 @@
         allowFallback: false
       },
       colors: {
-        textPrimary: "#163D70",
-        textSecondary: "#1D4A84"
+        textPrimary: "#151515",
+        textSecondary: "#1A1A1A"
       },
       typography: {
-        fontFamily: "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif",
-        coverTopSize: 66,
+        fontFamily: "'STKaiti', 'KaiTi', 'Kaiti SC', 'STSong', serif",
+        coverTopSize: 62,
         coverTopWeight: 500,
-        coverTitleStartSize: 156,
-        coverTitleMinSize: 88,
-        coverTitleWeight: 900,
-        coverTitleStrokeWidth: 1.8,
-        coverTitleFauxBoldOffset: 0.7,
-        coverTitleFauxBoldPasses: 6,
-        coverSubtitleStartSize: 58,
-        coverSubtitleMinSize: 42,
+        coverTitleStartSize: 148,
+        coverTitleMinSize: 84,
+        coverTitleWeight: 800,
+        coverTitleStrokeWidth: 0,
+        coverTitleFauxBoldOffset: 0,
+        coverTitleFauxBoldPasses: 0,
+        coverSubtitleStartSize: 54,
+        coverSubtitleMinSize: 40,
         coverSubtitleWeight: 500,
-        pageTitleSize: 60,
+        pageTitleSize: 56,
         pageTitleWeight: 700,
-        bodySize: 45,
+        bodySize: 52,
         bodyWeight: 500,
         leadWeight: 700
       },
@@ -1032,17 +1032,18 @@
           subtitleMaxLines: 1
         },
         page: {
-          titleX: 83,
-          titleY: 100,
-          titleWidth: 909,
-          titleLineHeight: 70,
+          showTitle: false,
+          titleX: 76,
+          titleY: 96,
+          titleWidth: 928,
+          titleLineHeight: 66,
           titleMaxLines: 2,
-          bodyX: 83,
-          bodyY: 182,
-          bodyWidth: 909,
-          bodyMaxY: 1000,
-          itemLineHeight: 56,
-          itemGap: 20
+          bodyX: 56,
+          bodyY: 94,
+          bodyWidth: 968,
+          bodyMaxY: 1270,
+          itemLineHeight: 74,
+          itemGap: 26
         }
       }
     },
@@ -1056,60 +1057,64 @@
         allowFallback: false
       },
       colors: {
-        textPrimary: "#231A2A",
-        textSecondary: "#2F2735",
-        textAccent: "#B24F67"
+        textPrimary: "#101010",
+        textSecondary: "#101010",
+        textAccent: "#101010"
       },
       typography: {
-        fontFamily: "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif",
-        coverTopSize: 58,
+        fontFamily: "'STKaiti', 'KaiTi', 'Kaiti SC', 'STSong', serif",
+        pageFontFamily: "'STKaiti', 'KaiTi', 'Kaiti SC', 'STSong', serif",
+        coverFontFamily: "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif",
+        coverTitleFontFamily: "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif",
+        coverTopSize: 72,
         coverTopWeight: 500,
-        coverTitleStartSize: 122,
-        coverTitleMinSize: 74,
+        coverTitleStartSize: 152,
+        coverTitleMinSize: 96,
         coverTitleWeight: 900,
-        coverTitleStrokeWidth: 2.2,
-        coverTitleFauxBoldOffset: 0.9,
-        coverTitleFauxBoldPasses: 8,
-        coverSubtitleStartSize: 52,
-        coverSubtitleMinSize: 40,
+        coverTitleStrokeWidth: 0,
+        coverTitleFauxBoldOffset: 0,
+        coverTitleFauxBoldPasses: 0,
+        coverSubtitleStartSize: 66,
+        coverSubtitleMinSize: 46,
         coverSubtitleWeight: 500,
         pageTitleSize: 60,
         pageTitleWeight: 700,
-        bodySize: 42,
+        bodySize: 54,
         bodyWeight: 500,
-        leadSize: 45,
-        leadWeight: 700
+        leadSize: 54,
+        leadWeight: 500
       },
       layout: {
         cover: {
-          topTextX: 132,
-          topTextY: 510,
-          topTextWidth: 492,
-          topTextLineHeight: 66,
+          topTextX: 72,
+          topTextY: 420,
+          topTextWidth: 560,
+          topTextLineHeight: 78,
           topTextMaxLines: 1,
           titleCenterX: 540,
-          titleY: 736,
-          titleWidth: 882,
-          titleLineHeight: 108,
+          titleY: 804,
+          titleWidth: 908,
+          titleLineHeight: 140,
           titleMaxLines: 2,
           subtitleCenterX: 540,
-          subtitleY: 1318,
-          subtitleWidth: 450,
-          subtitleLineHeight: 58,
+          subtitleY: 1260,
+          subtitleWidth: 720,
+          subtitleLineHeight: 74,
           subtitleMaxLines: 1
         },
         page: {
+          showTitle: false,
           titleX: 56,
           titleY: 98,
           titleWidth: 968,
           titleLineHeight: 72,
           titleMaxLines: 2,
-          bodyX: 56,
-          bodyY: 172,
-          bodyWidth: 968,
-          bodyMaxY: 1060,
-          itemLineHeight: 52,
-          itemGap: 14,
+          bodyX: 52,
+          bodyY: 118,
+          bodyWidth: 976,
+          bodyMaxY: 1270,
+          itemLineHeight: 74,
+          itemGap: 26,
           leadBodyGap: 8
         }
       }
@@ -4533,19 +4538,19 @@
       lead: String(leadWeight) + " " + String(leadSize) + "px " + family
     };
     var colors = {
-      textPrimary: "#231A2A",
-      textSecondary: "#2F2735",
-      textAccent: "#B24F67"
+      textPrimary: "#101010",
+      textSecondary: "#101010",
+      textAccent: "#101010"
     };
     var types = Array.isArray(segmentTypes) ? segmentTypes : [];
     var shouldCheckList = types.length === 0 || types.indexOf("list") >= 0;
     var shouldCheckTag = types.indexOf("tag") >= 0;
     var bodyX = typeof layout.bodyX === "number" ? layout.bodyX : 56;
-    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 172;
-    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 968;
-    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1060;
-    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 52;
-    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 14;
+    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 118;
+    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 976;
+    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1270;
+    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 74;
+    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 26;
     var leadBodyGap = typeof layout.leadBodyGap === "number" ? layout.leadBodyGap : 8;
 
     if (shouldCheckList) {
@@ -5602,7 +5607,79 @@
   }
 
   function drawTailunCover(ctx, group) {
-    drawRifuCover(ctx, group);
+    var profile = group.profile;
+    var colors = profile.colors || {};
+    var typography = profile.typography || {};
+    var box = profile.layout.cover || {};
+    var baseFamily = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var coverFamily = typography.coverFontFamily || baseFamily;
+    var titleFamily = typography.coverTitleFontFamily || coverFamily;
+    var topText = sanitizeText(group.coverTopText);
+    var title = sanitizeText(group.coverTitle);
+    var subtitle = sanitizeText(group.coverSubtitle || profile.coverSubtitle || "小说素材｜干货分享");
+    var topWeight = typography.coverTopWeight || 500;
+    var subtitleWeight = typography.coverSubtitleWeight || 500;
+
+    if (topText) {
+      var topSize = fitTextFontSize(
+        ctx,
+        topText,
+        box.topTextWidth,
+        box.topTextMaxLines,
+        typography.coverTopSize || 72,
+        46,
+        String(topWeight),
+        coverFamily
+      );
+      ctx.fillStyle = colors.textSecondary || colors.textPrimary || "#101010";
+      ctx.font = String(topWeight) + " " + topSize + "px " + coverFamily;
+      drawWrappedLimited(
+        ctx,
+        topText,
+        box.topTextX,
+        box.topTextY,
+        box.topTextWidth,
+        box.topTextLineHeight,
+        box.topTextMaxLines,
+        null
+      );
+    }
+
+    drawRifuCoverTitle(
+      ctx,
+      title,
+      box,
+      Object.assign({}, typography, {
+        fontFamily: titleFamily
+      }),
+      {
+        textPrimary: colors.textPrimary || "#101010",
+        textSecondary: colors.textSecondary || colors.textPrimary || "#101010"
+      }
+    );
+
+    var subtitleSize = fitTextFontSize(
+      ctx,
+      subtitle,
+      box.subtitleWidth,
+      box.subtitleMaxLines,
+      typography.coverSubtitleStartSize || 66,
+      typography.coverSubtitleMinSize || 46,
+      String(subtitleWeight),
+      coverFamily
+    );
+    ctx.fillStyle = colors.textPrimary || "#101010";
+    ctx.font = String(subtitleWeight) + " " + subtitleSize + "px " + coverFamily;
+    drawWrappedLimited(
+      ctx,
+      subtitle,
+      Math.round((box.subtitleCenterX || CANVAS_WIDTH / 2) - box.subtitleWidth / 2),
+      box.subtitleY,
+      box.subtitleWidth,
+      box.subtitleLineHeight,
+      box.subtitleMaxLines,
+      null
+    );
   }
 
   function drawXiboCover(ctx, group) {
@@ -5867,49 +5944,58 @@
     var colors = profile.colors || {};
     var typography = profile.typography || {};
     var layout = profile.layout.page || {};
-    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var family =
+      typography.pageFontFamily ||
+      typography.fontFamily ||
+      "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var bodySize = typography.bodySize || 45;
     var fonts = {
-      regular:
-        String(typography.bodyWeight || 500) + " " + String(typography.bodySize || 45) + "px " + family,
-      lead:
-        String(typography.leadWeight || 700) + " " + String(typography.bodySize || 45) + "px " + family
+      regular: String(typography.bodyWeight || 500) + " " + String(bodySize) + "px " + family,
+      lead: String(typography.leadWeight || 700) + " " + String(bodySize) + "px " + family
     };
     var titleText = sanitizeText(page.title);
-    var titleSize = fitTextFontSize(
-      ctx,
-      titleText,
-      layout.titleWidth,
-      layout.titleMaxLines,
-      typography.pageTitleSize || 60,
-      40,
-      String(typography.pageTitleWeight || 700),
-      family
-    );
     var result;
+    var showTitle = layout.showTitle !== false && !!titleText;
+    var bodyX = typeof layout.bodyX === "number" ? layout.bodyX : 83;
+    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 182;
+    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 909;
+    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1000;
+    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 56;
+    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 20;
 
-    ctx.fillStyle = colors.textPrimary || "#1C1C1C";
-    ctx.font = String(typography.pageTitleWeight || 700) + " " + titleSize + "px " + family;
-    drawWrappedLimited(
-      ctx,
-      titleText,
-      layout.titleX,
-      layout.titleY,
-      layout.titleWidth,
-      layout.titleLineHeight,
-      layout.titleMaxLines,
-      null
-    );
+    if (showTitle) {
+      var titleFamily = typography.pageTitleFontFamily || family;
+      var titleWidth = typeof layout.titleWidth === "number" ? layout.titleWidth : 909;
+      var titleLineHeight = typeof layout.titleLineHeight === "number" ? layout.titleLineHeight : 70;
+      var titleMaxLines = typeof layout.titleMaxLines === "number" ? layout.titleMaxLines : 2;
+      var titleX = typeof layout.titleX === "number" ? layout.titleX : 83;
+      var titleY = typeof layout.titleY === "number" ? layout.titleY : 100;
+      var titleSize = fitTextFontSize(
+        ctx,
+        titleText,
+        titleWidth,
+        titleMaxLines,
+        typography.pageTitleSize || 60,
+        40,
+        String(typography.pageTitleWeight || 700),
+        titleFamily
+      );
+
+      ctx.fillStyle = colors.textPrimary || "#1C1C1C";
+      ctx.font = String(typography.pageTitleWeight || 700) + " " + titleSize + "px " + titleFamily;
+      drawWrappedLimited(ctx, titleText, titleX, titleY, titleWidth, titleLineHeight, titleMaxLines, null);
+    }
 
     if (finalType === "list") {
       result = drawXiangxiangList(
         ctx,
         page.items,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
-        layout.itemGap,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
         fonts,
         colors
       );
@@ -5918,12 +6004,12 @@
       result = drawXiangxiangTag(
         ctx,
         tagItems,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
-        layout.itemGap,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
         fonts,
         colors
       );
@@ -5931,12 +6017,12 @@
       result = drawXiangxiangCompare(
         ctx,
         page.comparePairs,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
-        layout.itemGap,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
         fonts,
         colors
       );
@@ -5944,11 +6030,11 @@
       result = drawXiangxiangAutoText(
         ctx,
         page.text,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
         fonts,
         colors
       );
@@ -5972,7 +6058,7 @@
     ctx.font = fonts.regular;
 
     for (var i = 0; i < items.length; i += 1) {
-      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var raw = withXiangxiangSerialIfNeeded(i, items[i]);
       var lines = splitTextByWidth(ctx, raw, width);
       var rows = drawLinesWithMaxY(ctx, lines, x, y, lineHeight, maxY);
       y = rows.nextY;
@@ -6000,7 +6086,7 @@
     ctx.font = fonts.regular;
 
     for (var i = 0; i < items.length; i += 1) {
-      var raw = withAutoSerialIfNeeded(i, items[i]);
+      var raw = withXiangxiangSerialIfNeeded(i, items[i]);
       var parsed = splitTagLabel(raw);
       var text = parsed.label ? parsed.label + parsed.body : raw;
       var lines = splitTextByWidth(ctx, text, width);
@@ -6045,7 +6131,7 @@
       if (normal) {
         ctx.fillStyle = colors.textPrimary || "#1C1C1C";
         ctx.font = fonts.regular;
-        var normalLines = splitTextByWidth(ctx, withAutoSerialIfNeeded(i, normal), width);
+        var normalLines = splitTextByWidth(ctx, withXiangxiangSerialIfNeeded(i, normal), width);
         var normalRows = drawLinesWithMaxY(ctx, normalLines, x, y, lineHeight, maxY);
         y = normalRows.nextY;
         if (normalRows.truncated) {
@@ -6445,50 +6531,63 @@
     var colors = profile.colors || {};
     var typography = profile.typography || {};
     var layout = profile.layout.page || {};
-    var family = typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
+    var family = typography.pageFontFamily || typography.fontFamily || "'STSong', 'Noto Serif SC', 'Source Han Serif SC', serif";
     var fonts = {
       regular:
-        String(typography.bodyWeight || 500) + " " + String(typography.bodySize || 42) + "px " + family,
+        String(typography.bodyWeight || 500) + " " + String(typography.bodySize || 54) + "px " + family,
       lead:
-        String(typography.leadWeight || 700) + " " + String(typography.leadSize || typography.bodySize || 42) + "px " + family
+        String(typography.leadWeight || 500) +
+        " " +
+        String(typography.leadSize || typography.bodySize || 54) +
+        "px " +
+        family
     };
     var titleText = sanitizeText(page.title);
-    var titleSize = fitTextFontSize(
-      ctx,
-      titleText,
-      layout.titleWidth,
-      layout.titleMaxLines,
-      typography.pageTitleSize || 60,
-      40,
-      String(typography.pageTitleWeight || 700),
-      family
-    );
     var result;
     var leadBodyGap = typeof layout.leadBodyGap === "number" ? layout.leadBodyGap : 8;
+    var showTitle = layout.showTitle !== false && !!titleText;
+    var bodyX = typeof layout.bodyX === "number" ? layout.bodyX : 52;
+    var bodyY = typeof layout.bodyY === "number" ? layout.bodyY : 118;
+    var bodyWidth = typeof layout.bodyWidth === "number" ? layout.bodyWidth : 976;
+    var bodyMaxY = typeof layout.bodyMaxY === "number" ? layout.bodyMaxY : 1270;
+    var lineHeight = typeof layout.itemLineHeight === "number" ? layout.itemLineHeight : 74;
+    var itemGap = typeof layout.itemGap === "number" ? layout.itemGap : 26;
 
-    ctx.fillStyle = colors.textPrimary || "#231A2A";
-    ctx.font = String(typography.pageTitleWeight || 700) + " " + titleSize + "px " + family;
-    drawWrappedLimited(
-      ctx,
-      titleText,
-      layout.titleX,
-      layout.titleY,
-      layout.titleWidth,
-      layout.titleLineHeight,
-      layout.titleMaxLines,
-      null
-    );
+    if (showTitle) {
+      var titleSize = fitTextFontSize(
+        ctx,
+        titleText,
+        layout.titleWidth,
+        layout.titleMaxLines,
+        typography.pageTitleSize || 60,
+        40,
+        String(typography.pageTitleWeight || 700),
+        family
+      );
+      ctx.fillStyle = colors.textPrimary || "#101010";
+      ctx.font = String(typography.pageTitleWeight || 700) + " " + titleSize + "px " + family;
+      drawWrappedLimited(
+        ctx,
+        titleText,
+        layout.titleX,
+        layout.titleY,
+        layout.titleWidth,
+        layout.titleLineHeight,
+        layout.titleMaxLines,
+        null
+      );
+    }
 
     if (finalType === "list") {
       result = drawTailunList(
         ctx,
         page.items,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
-        layout.itemGap,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
         leadBodyGap,
         fonts,
         colors
@@ -6498,12 +6597,12 @@
       result = drawTailunTag(
         ctx,
         tagItems,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
-        layout.itemGap,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
         leadBodyGap,
         fonts,
         colors
@@ -6512,12 +6611,12 @@
       result = drawTailunCompare(
         ctx,
         page.comparePairs,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
-        layout.itemGap,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
+        itemGap,
         leadBodyGap,
         fonts,
         colors
@@ -6526,11 +6625,11 @@
       result = drawTailunAutoText(
         ctx,
         page.text,
-        layout.bodyX,
-        layout.bodyY,
-        layout.bodyWidth,
-        layout.bodyMaxY,
-        layout.itemLineHeight,
+        bodyX,
+        bodyY,
+        bodyWidth,
+        bodyMaxY,
+        lineHeight,
         fonts,
         colors
       );
@@ -6562,25 +6661,16 @@
     var y = startY;
     var truncated = false;
 
-    for (var i = 0; i < items.length; i += 1) {
-      var raw = withAutoSerialIfNeeded(i, items[i]);
-      var pair = splitTailunLeadBody(raw);
-      var block = drawTailunLeadBodyBlock(
-        ctx,
-        pair.lead,
-        pair.body,
-        x,
-        y,
-        width,
-        maxY,
-        lineHeight,
-        leadBodyGap,
-        fonts,
-        colors
-      );
-      y = block.nextY;
+    ctx.fillStyle = colors.textPrimary || "#101010";
+    ctx.font = fonts.regular;
 
-      if (block.truncated) {
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withTailunSerialIfNeeded(i, items[i]);
+      var lines = splitTextByWidth(ctx, raw, width);
+      var rows = drawLinesWithMaxY(ctx, lines, x, y, lineHeight, maxY);
+      y = rows.nextY;
+
+      if (rows.truncated) {
         truncated = true;
         break;
       }
@@ -6611,25 +6701,18 @@
     var y = startY;
     var truncated = false;
 
-    for (var i = 0; i < items.length; i += 1) {
-      var raw = withAutoSerialIfNeeded(i, items[i]);
-      var tagParsed = splitTagLabel(raw);
-      var block = drawTailunLeadBodyBlock(
-        ctx,
-        tagParsed.label,
-        tagParsed.body,
-        x,
-        y,
-        width,
-        maxY,
-        lineHeight,
-        leadBodyGap,
-        fonts,
-        colors
-      );
-      y = block.nextY;
+    ctx.fillStyle = colors.textPrimary || "#101010";
+    ctx.font = fonts.regular;
 
-      if (block.truncated) {
+    for (var i = 0; i < items.length; i += 1) {
+      var raw = withTailunSerialIfNeeded(i, items[i]);
+      var tagParsed = splitTagLabel(raw);
+      var text = tagParsed.label ? tagParsed.label + tagParsed.body : raw;
+      var lines = splitTextByWidth(ctx, text, width);
+      var rows = drawLinesWithMaxY(ctx, lines, x, y, lineHeight, maxY);
+      y = rows.nextY;
+
+      if (rows.truncated) {
         truncated = true;
         break;
       }
@@ -6666,42 +6749,24 @@
       var better = sanitizeText(pair.better);
 
       if (normal) {
-        var normalBlock = drawTailunLeadBodyBlock(
-          ctx,
-          "普通：",
-          normal,
-          x,
-          y,
-          width,
-          maxY,
-          lineHeight,
-          leadBodyGap,
-          fonts,
-          colors
-        );
-        y = normalBlock.nextY;
-        if (normalBlock.truncated) {
+        ctx.fillStyle = colors.textPrimary || "#101010";
+        ctx.font = fonts.regular;
+        var normalLines = splitTextByWidth(ctx, withTailunSerialIfNeeded(i, normal), width);
+        var normalRows = drawLinesWithMaxY(ctx, normalLines, x, y, lineHeight, maxY);
+        y = normalRows.nextY;
+        if (normalRows.truncated) {
           truncated = true;
           break;
         }
       }
 
       if (better) {
-        var betterBlock = drawTailunLeadBodyBlock(
-          ctx,
-          "优化：",
-          better,
-          x,
-          y,
-          width,
-          maxY,
-          lineHeight,
-          leadBodyGap,
-          fonts,
-          colors
-        );
-        y = betterBlock.nextY;
-        if (betterBlock.truncated) {
+        ctx.fillStyle = colors.textSecondary || colors.textPrimary || "#101010";
+        ctx.font = fonts.regular;
+        var betterLines = splitTextByWidth(ctx, "优化：" + better, width);
+        var betterRows = drawLinesWithMaxY(ctx, betterLines, x, y, lineHeight, maxY);
+        y = betterRows.nextY;
+        if (betterRows.truncated) {
           truncated = true;
           break;
         }
@@ -6718,7 +6783,7 @@
   }
 
   function drawTailunAutoText(ctx, text, x, startY, width, maxY, lineHeight, fonts, colors) {
-    ctx.fillStyle = colors.textPrimary || "#231A2A";
+    ctx.fillStyle = colors.textPrimary || "#101010";
     ctx.font = fonts.regular;
     var lines = splitTextByWidth(ctx, sanitizeText(text), width);
     var rows = drawLinesWithMaxY(ctx, lines, x, startY, lineHeight, maxY);
@@ -7644,6 +7709,28 @@
       return "";
     }
     return raw;
+  }
+
+  function withTailunSerialIfNeeded(index, text) {
+    var raw = withAutoSerialIfNeeded(index, text);
+    if (!raw) {
+      return "";
+    }
+    if (hasLeadingSerial(raw)) {
+      return raw;
+    }
+    return String(index + 1) + "、" + raw;
+  }
+
+  function withXiangxiangSerialIfNeeded(index, text) {
+    var raw = withAutoSerialIfNeeded(index, text);
+    if (!raw) {
+      return "";
+    }
+    if (hasLeadingSerial(raw)) {
+      return raw;
+    }
+    return String(index + 1) + "、" + raw;
   }
 
   function toStringArray(value) {
